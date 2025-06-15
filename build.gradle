@@ -46,6 +46,13 @@ dependencies {
 
     //mysql
     runtimeOnly 'com.mysql:mysql-connector-j'
+
+    //redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    //flyway
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-mysql'
 }
 
 tasks.register('initGitHooks', Copy) {
