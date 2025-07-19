@@ -36,10 +36,10 @@ out/
 ### VS Code ###
 .vscode/
 
-application*.yml
 docekr/db/db
 gradle.properties
 terraform/.terraform
 
 # Terraform sensitive variables file
 terraform/terraform.tfvars
+src/test/java/be/ddd/JasyptConfigTest.java
