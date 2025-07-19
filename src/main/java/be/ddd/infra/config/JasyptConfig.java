@@ -18,8 +18,8 @@ public class JasyptConfig {
         PooledPBEStringEncryptor encryptor = new PooledPBEStringEncryptor();
         SimpleStringPBEConfig config = new SimpleStringPBEConfig();
         config.setPassword(PASSWORD);
-        config.setPoolSize("1");
         config.setAlgorithm("PBEWithMD5AndDES");
+        config.setPoolSize("1");
         config.setStringOutputType("base64");
         config.setKeyObtentionIterations("1000");
         config.setSaltGeneratorClassName("org.jasypt.salt.RandomSaltGenerator");
