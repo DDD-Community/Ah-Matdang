@@ -1,0 +1,37 @@
+spring:
+  batch:
+    jdbc:
+      initialize-schema: always
+  flyway:
+    baseline-on-migrate: true
+    enabled: true
+    url: ENC(ckV/BSjYBlyA+3GzkRZaC9mKwgNMBDRxcdhjMcAnoO9UhB4sAL/3N+xL+5t36riF/OlMASoArRcM2qGFUkdS6yLgTUP163/WmM9zDP1WNDX2woyZkXWmVTkvSlQF/SehFEp0DRDwi+WJFbiuJqG2NqbH3x1yLPmZubRDasTBBvtEk/GtQayw+tNI9RciRHVR)
+    user: ENC(EUc5lpk9Sn77473PV6hm7Q==)
+    password: ENC(7pCO5qSn9x5VNppvYxsJUrZLTfWiNggsIrFpPpTSjyI=)
+    locations: classpath:/db/migration
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  datasource:
+    url: ENC(ckV/BSjYBlyA+3GzkRZaC9mKwgNMBDRxcdhjMcAnoO9UhB4sAL/3N+xL+5t36riF/OlMASoArRcM2qGFUkdS6yLgTUP163/WmM9zDP1WNDX2woyZkXWmVTkvSlQF/SehFEp0DRDwi+WJFbiuJqG2NqbH3x1yLPmZubRDasTBBvtEk/GtQayw+tNI9RciRHVR)
+    username: ENC(EUc5lpk9Sn77473PV6hm7Q==)
+    password: ENC(7pCO5qSn9x5VNppvYxsJUrZLTfWiNggsIrFpPpTSjyI=)
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 50
+  #        format_sql: true
+  #        show_sql: true
+logging:
+  level:
+    org.hibernate.SQL: info
+    org.hibernate.type.descriptor.sql.BasicBinder: trace
+jasypt:
+  encryptor:
+    bean: jasyptStringEncryptor
