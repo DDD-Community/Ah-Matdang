@@ -1,0 +1,104 @@
+name: Deploy to GCP
+
+on:
+  push:
+    branches:
+      - main
+
+# 환경 변수 설정
+env:
+  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GCP_REGION: asia-northeast3
+  APP_NAME: ahmatdang
+  GAR_LOCATION: ${{ secrets.GAR_LOCATION }}
+  GAR_REPOSITORY: ${{ secrets.GAR_REPOSITORY }}
+  VM_INSTANCE_NAME: ${{ secrets.VM_INSTANCE_NAME }}
+  VM_ZONE: ${{ secrets.VM_ZONE }}
+  DB_CONNECTION_NAME: ${{ secrets.DB_CONNECTION_NAME }}
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build with Gradle
+        run: ./gradlew bootJar
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: 'google-github-actions/auth@v2'
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Configure Docker
+        run: gcloud auth configure-docker $GAR_LOCATION-docker.pkg.dev -q
+
+      - name: Build and Push Docker Image
+        id: docker_build
+        run: |
+          IMAGE_TAG="$GAR_LOCATION-docker.pkg.dev/$GCP_PROJECT_ID/$GAR_REPOSITORY/$APP_NAME:${{ github.sha }}"
+          docker build -t $IMAGE_TAG .
+          docker push $IMAGE_TAG
+          echo "image_tag=$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy to GCP Compute Engine
+        run: |
+          gcloud compute ssh $VM_INSTANCE_NAME --zone $VM_ZONE --project $GCP_PROJECT_ID --quiet --command="
+            # 변수 설정
+            APP_IMAGE_TAG=${{ steps.docker_build.outputs.image_tag }}
+            APP_NAME=${{ env.APP_NAME }}
+            DB_USER=${{ secrets.DB_USER }}
+            DB_PASS=${{ secrets.DB_PASSWORD }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            DB_CONNECTION_NAME=${{ env.DB_CONNECTION_NAME }}
+            PROXY_IMAGE_TAG=gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.8.0
+
+            # 1. Docker 네트워크 생성 (없으면)
+            docker network create $APP_NAME-net || true
+
+            # 2. 기존 컨테이너 중지 및 제거
+            docker stop $APP_NAME || true
+            docker rm $APP_NAME || true
+            docker stop $APP_NAME-proxy || true
+            docker rm $APP_NAME-proxy || true
+
+            # 3. 최신 이미지 pull
+            docker pull $APP_IMAGE_TAG
+            docker pull $PROXY_IMAGE_TAG
+
+            # 4. Cloud SQL Auth Proxy 컨테이너 실행
+            docker run -d --name $APP_NAME-proxy \
+              --network $APP_NAME-net \
+              -v /var/run/docker.sock:/var/run/docker.sock \
+              $PROXY_IMAGE_TAG \
+              --private-ip $DB_CONNECTION_NAME
+
+            # 5. 애플리케이션 컨테이너 실행
+            docker run -d --name $APP_NAME \
+              --network $APP_NAME-net \
+              -p 8080:8080 \
+              -e SPRING_DATASOURCE_URL=jdbc:mysql:///$DB_NAME?useSSL=false \
+              -e SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver \
+              -e SPRING_DATASOURCE_USERNAME=$DB_USER \
+              -e SPRING_DATASOURCE_PASSWORD=$DB_PASS \
+              -e CLOUDSQL_INSTANCE=$DB_CONNECTION_NAME \
+              $APP_IMAGE_TAG
+          "

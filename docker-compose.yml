@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  app:
+    # .env 파일에 정의된 이미지 주소를 사용합니다.
+    image: ${GAR_IMAGE_URL}
+    container_name: ahmatdang-app-local
+    ports:
+      - "8080:8080"
+    networks:
+      - ahmatdang-net-local
+    env_file:
+      - ./.env
+    depends_on:
+      - proxy
+
+  proxy:
+    image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.8.0
+    container_name: ahmatdang-proxy-local
+    command: --private-ip ${DB_CONNECTION_NAME}
+    networks:
+      - ahmatdang-net-local
+    # 로컬 gcloud 인증 정보를 컨테이너에 공유하여 GCP에 접속
+    volumes:
+      - ~/.config/gcloud:/root/.config/gcloud:ro
+    restart: always
+
+networks:
+  ahmatdang-net-local:
+    driver: bridge
