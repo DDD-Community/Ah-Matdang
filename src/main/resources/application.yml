@@ -1,0 +1,62 @@
+spring:
+  config:
+    import: optional:file:.env[.properties]
+  application:
+    name: Ah-matdang
+  profiles:
+    active:
+      - prod
+    group:
+      dev:
+        - dev
+      prod:
+        - prod
+    default:
+      dev
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+#logging:
+#  config: classpath:logback-dev.xml
+#  discord:
+#    webhook-uri: https://discord.com/api/webhooks/1254394407206125568/7yvFd17WWaMmLLRyvGiagz687wo_QDCPC419w4xLaZS9Ul8ERZ-LZz9PkCrAHb0C4Ssy
+#  pattern:
+#    console: "%d{HH:mm:ss} [%thread] [%-5level] %logger{36} - %msg%n"
+
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: prometheus
+
+app:
+  cors:
+    path-pattern: /api/**
+    allowed-origins:
+      - "*"
+    allowed-methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+    allowed-headers:
+      - "*"
+    exposed-headers:
+      - Authorization
+      - Content-Type
+  store-info:
+    defaults:
+      - starbucks
+      - test
+  hmac:
+    secret: ENC(jP8A2gyCQbR1P9wV6dG1lhRH3irrwURocEHzTek/ocM=)
+    algorithm: ENC(4fvHOfRsZwC5lPG2fgBPs/RqF0Z1OXUQ)

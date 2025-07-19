@@ -39,7 +39,7 @@ out/
 docekr/db/db
 gradle.properties
 terraform/.terraform
-
+application-dev.yml
 # Terraform sensitive variables file
 terraform/terraform.tfvars
-src/test/java/be/ddd/JasyptConfigTest.java
+/src/test/java/be/ddd/JasyptConfigTest.java
