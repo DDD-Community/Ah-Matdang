@@ -34,4 +34,6 @@ logging:
     org.hibernate.type.descriptor.sql.BasicBinder: trace
 jasypt:
   encryptor:
+    password: ${JASYPT_ENCRYPTOR_PASSWORD}
     bean: jasyptStringEncryptor
+
