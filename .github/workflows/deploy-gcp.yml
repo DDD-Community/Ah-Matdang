@@ -47,13 +47,12 @@ jobs:
           gcloud auth configure-docker asia-northeast3-docker.pkg.dev --quiet
 
       - name: Build & Push Docker image
-        env:
-          ARTIFACT_REGISTRY_URL: ${{ env.LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}
-          IMAGE_URI: ${{ env.ARTIFACT_REGISTRY_URL }}:${{ env.IMAGE_TAG }}
-        run: |
-          docker build --platform linux/amd64 \
-            -t "${IMAGE_URI}" .
-          docker push "${IMAGE_URI}"
+        run:
+          IMAGE_URI="${{ env.LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
+          echo "▶ IMAGE_URI = $IMAGE_URI"
+
+          docker build --platform linux/amd64 -t "$IMAGE_URI" .
+          docker push     "$IMAGE_URI"
 
   deploy:
     name: Deploy to GCP VM
@@ -69,15 +68,19 @@ jobs:
           user: ubuntu
           ssh_private_key: ${{ secrets.GCP_VM_SSH_PRIVATE_KEY }}
           command: |
+            set -e
+
             # Configure Docker auth on the VM
             gcloud auth configure-docker asia-northeast3-docker.pkg.dev --quiet
+
+            IMAGE_URI="${{ env.LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
 
             # Stop & remove existing container
             docker stop ${{ env.CONTAINER_NAME }} 2>/dev/null || true
             docker rm   ${{ env.CONTAINER_NAME }} 2>/dev/null || true
 
             # Pull the newly built image
-            docker pull "${IMAGE_URI}"
+            docker pull "$IMAGE_URI"
 
             # Run container with Jasypt password (and let the app's YAML handle DB connection)
             docker run -d \
@@ -85,4 +88,4 @@ jobs:
               --restart unless-stopped \
               -p 8080:8080 \
               -e JASYPT_ENCRYPTOR_PASSWORD="${{ secrets.JASYPT_PASSWORD }}" \
-              "${IMAGE_URI}"
+              "$IMAGE_URI"
