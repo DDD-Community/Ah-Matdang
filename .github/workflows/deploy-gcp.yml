@@ -10,10 +10,7 @@ env:
   LOCATION: ${{secrets.GCP_LOCATION }}
   REPOSITORY: ${{secrets.GCP_REPOSITORY }}
   IMAGE_NAME: ${{secrets.GCP_IMAGE_NAME }}
-  ARTIFACT_REGISTRY_URL: ${{ env.LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}
-
   IMAGE_TAG: ${{ secrets.GCP_TAG }}
-  IMAGE_URI: ${{ env.ARTIFACT_REGISTRY_URL }}:${{ env.IMAGE_TAG }}
 
   # VM 정보 (Terraform으로 생성된 값)
   VM_NAME: ${{secrets.VM_INSTANCE_NAME }}
@@ -26,6 +23,10 @@ jobs:
   build-and-push:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
+    env:
+      ARTIFACT_REGISTRY_URL: ${{ env.LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}
+      IMAGE_URI: ${{ env.ARTIFACT_REGISTRY_URL }}:${{ env.IMAGE_TAG }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
