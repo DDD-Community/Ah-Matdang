@@ -59,6 +59,12 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
+
+      - name: Authenticate to GCP for Deploy
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
       - name: SSH & Deploy
         uses: google-github-actions/ssh-compute@v1
         with:
