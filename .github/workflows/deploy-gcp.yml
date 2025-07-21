@@ -1,30 +1,31 @@
-name: Deploy to GCP
+name: CI/CD → GCP VM with Docker & Jasypt
 
 on:
   push:
     branches:
       - main
 
-# 환경 변수 설정
 env:
-  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  GCP_REGION: asia-northeast3
-  APP_NAME: ahmatdang
-  GAR_LOCATION: ${{ secrets.GAR_LOCATION }}
-  GAR_REPOSITORY: ${{ secrets.GAR_REPOSITORY }}
-  VM_INSTANCE_NAME: ${{ secrets.VM_INSTANCE_NAME }}
-  VM_ZONE: ${{ secrets.VM_ZONE }}
-  DB_CONNECTION_NAME: ${{ secrets.DB_CONNECTION_NAME }}
+  PROJECT_ID: ${{secrets.GCP_PROJECT_ID }}
+  LOCATION: ${{secrets.GCP_LOCATION }}
+  REPOSITORY: ${{secrets.GCP_REPOSITORY }}
+  IMAGE_NAME: ${{secrets.GCP_IMAGE_NAME }}
+  ARTIFACT_REGISTRY_URL: ${{ env.LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}
+
+  IMAGE_TAG: ${{ secrets.GCP_TAG }}
+  IMAGE_URI: ${{ env.ARTIFACT_REGISTRY_URL }}:${{ env.IMAGE_TAG }}
+
+  # VM 정보 (Terraform으로 생성된 값)
+  VM_NAME: ${{secrets.VM_INSTANCE_NAME }}
+  VM_ZONE: ${{secrets.VM_ZONE }}
+
+  # 컨테이너 이름
+  CONTAINER_NAME: ${{secrets.CONTAINER_NAME }}
 
 jobs:
-  build-and-deploy:
-    name: Build and Deploy
+  build-and-push:
+    name: Build & Push Docker Image
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -35,70 +36,52 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-
       - name: Build with Gradle
-        run: ./gradlew bootJar
+        run: ./gradlew clean build -x test
 
-      - name: Authenticate to Google Cloud
-        id: auth
-        uses: 'google-github-actions/auth@v2'
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
-      - name: Configure Docker
-        run: gcloud auth configure-docker $GAR_LOCATION-docker.pkg.dev -q
-
-      - name: Build and Push Docker Image
-        id: docker_build
+      - name: Configure Docker for Artifact Registry
         run: |
-          IMAGE_TAG="$GAR_LOCATION-docker.pkg.dev/$GCP_PROJECT_ID/$GAR_REPOSITORY/$APP_NAME:${{ github.sha }}"
-          docker build -t $IMAGE_TAG .
-          docker push $IMAGE_TAG
-          echo "image_tag=$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+          gcloud auth configure-docker asia-northeast3-docker.pkg.dev --quiet
 
-      - name: Deploy to GCP Compute Engine
+      - name: Build & Push Docker image
         run: |
-          gcloud compute ssh $VM_INSTANCE_NAME --zone $VM_ZONE --project $GCP_PROJECT_ID --quiet --command="
-            # 변수 설정
-            APP_IMAGE_TAG=${{ steps.docker_build.outputs.image_tag }}
-            APP_NAME=${{ env.APP_NAME }}
-            DB_USER=${{ secrets.DB_USER }}
-            DB_PASS=${{ secrets.DB_PASSWORD }}
-            DB_NAME=${{ secrets.DB_NAME }}
-            DB_CONNECTION_NAME=${{ env.DB_CONNECTION_NAME }}
-            PROXY_IMAGE_TAG=gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.8.0
+          docker build --platform linux/amd64 \
+            -t "${IMAGE_URI}" .
+          docker push "${IMAGE_URI}"
 
-            # 1. Docker 네트워크 생성 (없으면)
-            docker network create $APP_NAME-net || true
+  deploy:
+    name: Deploy to GCP VM
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH & Deploy
+        uses: google-github-actions/ssh-compute@v1
+        with:
+          project_id: ${{env.PROJECT_ID}}
+          zone: ${{ env.VM_ZONE }}
+          instance_name: ${{ env.VM_NAME }}
+          user: ubuntu
+          ssh_private_key: ${{ secrets.GCP_VM_SSH_PRIVATE_KEY }}
+          command: |
+            # Configure Docker auth on the VM
+            gcloud auth configure-docker asia-northeast3-docker.pkg.dev --quiet
 
-            # 2. 기존 컨테이너 중지 및 제거
-            docker stop $APP_NAME || true
-            docker rm $APP_NAME || true
-            docker stop $APP_NAME-proxy || true
-            docker rm $APP_NAME-proxy || true
+            # Stop & remove existing container
+            docker stop ${{ env.CONTAINER_NAME }} 2>/dev/null || true
+            docker rm   ${{ env.CONTAINER_NAME }} 2>/dev/null || true
 
-            # 3. 최신 이미지 pull
-            docker pull $APP_IMAGE_TAG
-            docker pull $PROXY_IMAGE_TAG
+            # Pull the newly built image
+            docker pull "${IMAGE_URI}"
 
-            # 4. Cloud SQL Auth Proxy 컨테이너 실행
-            docker run -d --name $APP_NAME-proxy \
-              --network $APP_NAME-net \
-              -v /var/run/docker.sock:/var/run/docker.sock \
-              $PROXY_IMAGE_TAG \
-              --private-ip $DB_CONNECTION_NAME
-
-            # 5. 애플리케이션 컨테이너 실행
-            docker run -d --name $APP_NAME \
-              --network $APP_NAME-net \
+            # Run container with Jasypt password (and let the app's YAML handle DB connection)
+            docker run -d \
+              --name ${{ env.CONTAINER_NAME }} \
+              --restart unless-stopped \
               -p 8080:8080 \
-              -e SPRING_DATASOURCE_URL=jdbc:mysql:///$DB_NAME?useSSL=false \
-              -e SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver \
-              -e SPRING_DATASOURCE_USERNAME=$DB_USER \
-              -e SPRING_DATASOURCE_PASSWORD=$DB_PASS \
-              -e CLOUDSQL_INSTANCE=$DB_CONNECTION_NAME \
-              $APP_IMAGE_TAG
-          "
+              -e JASYPT_ENCRYPTOR_PASSWORD="${{ secrets.JASYPT_PASSWORD }}" \
+              "${IMAGE_URI}"
