@@ -23,9 +23,6 @@ jobs:
   build-and-push:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
-    env:
-      ARTIFACT_REGISTRY_URL: ${{ env.LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}
-      IMAGE_URI: ${{ env.ARTIFACT_REGISTRY_URL }}:${{ env.IMAGE_TAG }}
 
     steps:
       - name: Checkout code
@@ -50,6 +47,9 @@ jobs:
           gcloud auth configure-docker asia-northeast3-docker.pkg.dev --quiet
 
       - name: Build & Push Docker image
+        env:
+          ARTIFACT_REGISTRY_URL: ${{ env.LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}
+          IMAGE_URI: ${{ env.ARTIFACT_REGISTRY_URL }}:${{ env.IMAGE_TAG }}
         run: |
           docker build --platform linux/amd64 \
             -t "${IMAGE_URI}" .
