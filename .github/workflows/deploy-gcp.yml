@@ -67,22 +67,13 @@ jobs:
           instance_name: ${{ env.VM_NAME }}
           user: ubuntu
           ssh_private_key: ${{ secrets.GCP_VM_SSH_PRIVATE_KEY }}
-          command: |
-            set -e
-
-            # Configure Docker auth on the VM
-            gcloud auth configure-docker asia-northeast3-docker.pkg.dev --quiet
-
-            IMAGE_URI="${{ env.LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
-
-            # Stop & remove existing container
-            docker stop ${{ env.CONTAINER_NAME }} 2>/dev/null || true
-            docker rm   ${{ env.CONTAINER_NAME }} 2>/dev/null || true
-
-            # Pull the newly built image
-            docker pull "$IMAGE_URI"
-
-            # Run container with Jasypt password (and let the app's YAML handle DB connection)
+          command: >
+            set -e &&
+            gcloud auth configure-docker asia-northeast3-docker.pkg.dev --quiet &&
+            IMAGE_URI="${{ env.LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" &&
+            docker stop ${{ env.CONTAINER_NAME }} 2>/dev/null || true &&
+            docker rm   ${{ env.CONTAINER_NAME }} 2>/dev/null || true &&
+            docker pull "$IMAGE_URI" &&
             docker run -d \
               --name ${{ env.CONTAINER_NAME }} \
               --restart unless-stopped \
