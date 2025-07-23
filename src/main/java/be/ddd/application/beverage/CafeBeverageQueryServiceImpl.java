@@ -1,6 +1,7 @@
 package be.ddd.application.beverage;
 
 import be.ddd.api.dto.res.BeverageCountDto;
+import be.ddd.api.dto.res.BeverageSearchDto;
 import be.ddd.api.dto.res.CafeBeverageCursorPageDto;
 import be.ddd.api.dto.res.CafeBeverageDetailsDto;
 import be.ddd.application.beverage.dto.CafeBeveragePageDto;
@@ -77,5 +78,10 @@ public class CafeBeverageQueryServiceImpl implements CafeBeverageQueryService {
         CafeBrand brand = brandFilter.orElse(null);
 
         return beverageRepository.countSugarLevelByBrand(brand);
+    }
+
+    @Override
+    public List<BeverageSearchDto> searchBeverages(String keyword, Long memberId) {
+        return beverageRepository.searchByName(keyword, memberId);
     }
 }

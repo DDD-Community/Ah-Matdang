@@ -2,6 +2,7 @@ package be.ddd.api.cafe;
 
 import be.ddd.api.dto.res.BeverageCountDto;
 import be.ddd.api.dto.res.BeverageLikeDto;
+import be.ddd.api.dto.res.BeverageSearchDto;
 import be.ddd.api.dto.res.CafeBeverageCursorPageDto;
 import be.ddd.api.dto.res.CafeBeverageDetailsDto;
 import be.ddd.application.beverage.BeverageLikeService;
@@ -12,6 +13,7 @@ import be.ddd.common.util.StringBase64EncodingUtil;
 import be.ddd.domain.entity.crawling.CafeBrand;
 import be.ddd.domain.entity.crawling.SugarLevel;
 import jakarta.validation.constraints.Positive;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -75,5 +77,12 @@ public class CafeBeverageAPI {
     public ApiResponse<BeverageLikeDto> unlikeBeverage(@PathVariable UUID productId) {
         BeverageLikeDto unlikeDto = beverageLikeService.unlikeBeverage(MEMBER_ID, productId);
         return ApiResponse.success(unlikeDto);
+    }
+
+    @GetMapping("/search")
+    public ApiResponse<List<BeverageSearchDto>> searchBeverages(@RequestParam String keyword) {
+        List<BeverageSearchDto> results =
+                cafeBeverageQueryService.searchBeverages(keyword, MEMBER_ID);
+        return ApiResponse.success(results);
     }
 }

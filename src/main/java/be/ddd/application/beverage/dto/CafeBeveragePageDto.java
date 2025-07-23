@@ -1,5 +1,6 @@
 package be.ddd.application.beverage.dto;
 
+import be.ddd.domain.entity.crawling.BeverageNutrition;
 import be.ddd.domain.entity.crawling.BeverageType;
 import be.ddd.domain.entity.crawling.CafeBeverage;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -12,6 +13,7 @@ public record CafeBeveragePageDto(
         String imgUrl,
         BeverageType beverageType,
         CafeStoreDto cafeStoreDto,
+        BeverageNutrition beverageNutrition,
         boolean isLiked) {
 
     public static CafeBeveragePageDto of(CafeBeverage e, boolean isLiked) {
@@ -22,6 +24,7 @@ public record CafeBeveragePageDto(
                 e.getImgUrl(),
                 e.getBeverageType(),
                 new CafeStoreDto(e.getCafeStore().getCafeBrand()),
+                e.getBeverageNutrition(),
                 isLiked);
     }
 }

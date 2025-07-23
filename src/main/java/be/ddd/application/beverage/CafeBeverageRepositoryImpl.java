@@ -1,6 +1,8 @@
 package be.ddd.application.beverage;
 
 import be.ddd.api.dto.res.BeverageCountDto;
+import be.ddd.api.dto.res.BeverageSearchDto;
+import be.ddd.api.dto.res.QBeverageSearchDto;
 import be.ddd.application.beverage.dto.CafeBeveragePageDto;
 import be.ddd.application.beverage.dto.CafeStoreDto;
 import be.ddd.domain.entity.crawling.CafeBrand;
@@ -119,5 +121,27 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
             return beverage.beverageNutrition.sugarG.between(1, 20);
         }
         return null;
+    }
+
+    @Override
+    public List<BeverageSearchDto> searchByName(String keyword, Long memberId) {
+        return queryFactory
+                .select(
+                        new QBeverageSearchDto(
+                                beverage.id,
+                                beverage.name,
+                                beverage.cafeStore.cafeBrand.stringValue(),
+                                beverage.imgUrl,
+                                beverage.beverageType,
+                                beverage.beverageNutrition,
+                                memberBeverageLike.isNotNull()))
+                .from(beverage)
+                .leftJoin(memberBeverageLike)
+                .on(
+                        beverage.id
+                                .eq(memberBeverageLike.beverage.id)
+                                .and(memberBeverageLike.member.id.eq(memberId)))
+                .where(beverage.name.containsIgnoreCase(keyword))
+                .fetch();
     }
 }

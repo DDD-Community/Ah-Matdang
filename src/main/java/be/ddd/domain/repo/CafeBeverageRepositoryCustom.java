@@ -1,6 +1,7 @@
 package be.ddd.domain.repo;
 
 import be.ddd.api.dto.res.BeverageCountDto;
+import be.ddd.api.dto.res.BeverageSearchDto;
 import be.ddd.application.beverage.dto.CafeBeveragePageDto;
 import be.ddd.domain.entity.crawling.CafeBrand;
 import be.ddd.domain.entity.crawling.SugarLevel;
@@ -15,9 +16,7 @@ public interface CafeBeverageRepositoryCustom {
             @Nullable SugarLevel sugarLevel,
             Long memberId);
 
-    /*long countAll(CafeBrand brand);
-
-    long countBySugar(CafeBrand brand, SugarLevel sugarLevel);*/
-
     BeverageCountDto countSugarLevelByBrand(@Nullable CafeBrand brandFilter);
+
+    List<BeverageSearchDto> searchByName(String keyword, Long memberId);
 }
