@@ -40,6 +40,7 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
                                 beverage.beverageType,
                                 Projections.constructor(
                                         CafeStoreDto.class, beverage.cafeStore.cafeBrand),
+                                beverage.beverageNutrition,
                                 memberBeverageLike.isNotNull()))
                 .from(beverage)
                 .leftJoin(memberBeverageLike)
