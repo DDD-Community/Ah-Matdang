@@ -1,6 +1,6 @@
 package be.ddd.infra.config;
 
-import java.time.ZonedDateTime;
+import be.ddd.common.util.CustomClock;
 import java.util.Optional;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +13,6 @@ public class JpaConfig {
 
     @Bean(name = "auditingDateTimeProvider")
     public DateTimeProvider auditingDateTimeProvider() {
-        return () -> Optional.of(ZonedDateTime.now());
+        return () -> Optional.of(CustomClock.now());
     }
 }
