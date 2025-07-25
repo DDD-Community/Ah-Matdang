@@ -1,10 +1,6 @@
 package be.ddd.api.cafe;
 
-import be.ddd.api.dto.res.BeverageCountDto;
-import be.ddd.api.dto.res.BeverageLikeDto;
-import be.ddd.api.dto.res.BeverageSearchDto;
-import be.ddd.api.dto.res.CafeBeverageCursorPageDto;
-import be.ddd.api.dto.res.CafeBeverageDetailsDto;
+import be.ddd.api.dto.res.*;
 import be.ddd.application.beverage.BeverageLikeService;
 import be.ddd.application.beverage.CafeBeverageQueryService;
 import be.ddd.application.beverage.dto.CafeBeveragePageDto;
@@ -13,7 +9,6 @@ import be.ddd.common.util.StringBase64EncodingUtil;
 import be.ddd.domain.entity.crawling.CafeBrand;
 import be.ddd.domain.entity.crawling.SugarLevel;
 import jakarta.validation.constraints.Positive;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -80,9 +75,9 @@ public class CafeBeverageAPI {
     }
 
     @GetMapping("/search")
-    public ApiResponse<List<BeverageSearchDto>> searchBeverages(@RequestParam String keyword) {
-        List<BeverageSearchDto> results =
+    public ApiResponse<BeverageSearchResultDto> searchBeverages(@RequestParam String keyword) {
+        BeverageSearchResultDto beverageSearchResultDto =
                 cafeBeverageQueryService.searchBeverages(keyword, MEMBER_ID);
-        return ApiResponse.success(results);
+        return ApiResponse.success(beverageSearchResultDto);
     }
 }

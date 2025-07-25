@@ -1,9 +1,10 @@
 package be.ddd.application.beverage;
 
 import be.ddd.api.dto.res.BeverageCountDto;
-import be.ddd.api.dto.res.BeverageSearchDto;
+import be.ddd.api.dto.res.BeverageSearchResultDto;
 import be.ddd.api.dto.res.CafeBeverageCursorPageDto;
 import be.ddd.api.dto.res.CafeBeverageDetailsDto;
+import be.ddd.application.beverage.dto.BeverageSearchDto;
 import be.ddd.application.beverage.dto.CafeBeveragePageDto;
 import be.ddd.application.beverage.dto.CafeStoreDto;
 import be.ddd.common.util.StringBase64EncodingUtil;
@@ -81,7 +82,10 @@ public class CafeBeverageQueryServiceImpl implements CafeBeverageQueryService {
     }
 
     @Override
-    public List<BeverageSearchDto> searchBeverages(String keyword, Long memberId) {
-        return beverageRepository.searchByName(keyword, memberId);
+    public BeverageSearchResultDto searchBeverages(String keyword, Long memberId) {
+        List<BeverageSearchDto> beverageSearchResults =
+                beverageRepository.searchByName(keyword, memberId);
+        long likeCount = beverageSearchResults.stream().filter(BeverageSearchDto::isLiked).count();
+        return new BeverageSearchResultDto(beverageSearchResults, likeCount);
     }
 }

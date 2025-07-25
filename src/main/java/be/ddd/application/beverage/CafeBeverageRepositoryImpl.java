@@ -1,10 +1,10 @@
 package be.ddd.application.beverage;
 
 import be.ddd.api.dto.res.BeverageCountDto;
-import be.ddd.api.dto.res.BeverageSearchDto;
-import be.ddd.api.dto.res.QBeverageSearchDto;
+import be.ddd.application.beverage.dto.BeverageSearchDto;
 import be.ddd.application.beverage.dto.CafeBeveragePageDto;
 import be.ddd.application.beverage.dto.CafeStoreDto;
+import be.ddd.application.beverage.dto.QBeverageSearchDto;
 import be.ddd.domain.entity.crawling.CafeBrand;
 import be.ddd.domain.entity.crawling.QCafeBeverage;
 import be.ddd.domain.entity.crawling.SugarLevel;
@@ -129,10 +129,12 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
                 .select(
                         new QBeverageSearchDto(
                                 beverage.id,
+                                beverage.productId,
                                 beverage.name,
-                                beverage.cafeStore.cafeBrand.stringValue(),
                                 beverage.imgUrl,
                                 beverage.beverageType,
+                                Projections.constructor(
+                                        CafeStoreDto.class, beverage.cafeStore.cafeBrand),
                                 beverage.beverageNutrition,
                                 memberBeverageLike.isNotNull()))
                 .from(beverage)
