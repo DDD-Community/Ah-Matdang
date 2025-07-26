@@ -2,7 +2,7 @@ package be.ddd.common.entity;
 
 import be.ddd.common.util.CustomClock;
 import jakarta.persistence.*;
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
 import lombok.Getter;
 import org.hibernate.annotations.Comment;
 import org.springframework.data.annotation.CreatedDate;
@@ -17,12 +17,12 @@ public abstract class BaseTimeEntity {
     @CreatedDate
     @Comment("생성 일자")
     @Column(name = "CREATED_DATE", nullable = false, updatable = false)
-    private ZonedDateTime createdDateTime;
+    private LocalDateTime createdDateTime;
 
     @LastModifiedDate
     @Comment("수정 일자")
     @Column(name = "UPDATE_DATE")
-    private ZonedDateTime modifiedDateTime;
+    private LocalDateTime modifiedDateTime;
 
     public BaseTimeEntity() {
         createdDateTime = modifiedDateTime = CustomClock.now();

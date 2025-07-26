@@ -1,6 +1,7 @@
 package be.ddd.common.util;
 
-import java.time.ZonedDateTime;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 public class CustomClock {
 
@@ -11,7 +12,7 @@ public class CustomClock {
         instance = DEFAULT;
     }
 
-    public static ZonedDateTime now() {
+    public static LocalDateTime now() {
         return instance.timeNow();
     }
 
@@ -19,7 +20,7 @@ public class CustomClock {
         CustomClock.instance = customClock;
     }
 
-    protected ZonedDateTime timeNow() {
-        return ZonedDateTime.now();
+    protected LocalDateTime timeNow() {
+        return LocalDateTime.now(ZoneId.of("Asia/Seoul"));
     }
 }
