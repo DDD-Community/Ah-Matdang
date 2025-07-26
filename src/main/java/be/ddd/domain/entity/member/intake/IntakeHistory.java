@@ -32,4 +32,10 @@ public class IntakeHistory extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "beverage_id", nullable = false)
     private CafeBeverage cafeBeverage;
+
+    public IntakeHistory(Member member, LocalDateTime intakeTime, CafeBeverage cafeBeverage) {
+        this.member = member;
+        this.intakeTime = intakeTime;
+        this.cafeBeverage = cafeBeverage;
+    }
 }
