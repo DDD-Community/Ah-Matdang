@@ -31,7 +31,8 @@ public class IntakeHistoryRepositoryImpl implements IntakeHistoryRepositoryCusto
                                 intakeHistory.cafeBeverage.name,
                                 intakeHistory.cafeBeverage.cafeStore.cafeBrand,
                                 intakeHistory.intakeTime,
-                                intakeHistory.cafeBeverage.beverageNutrition))
+                                intakeHistory.cafeBeverage.beverageNutrition,
+                                intakeHistory.cafeBeverage.sugarLevel))
                 .from(intakeHistory)
                 .where(
                         intakeHistory.member.id.eq(memberId),
@@ -54,7 +55,8 @@ public class IntakeHistoryRepositoryImpl implements IntakeHistoryRepositoryCusto
                                 intakeHistory.cafeBeverage.name,
                                 intakeHistory.cafeBeverage.cafeStore.cafeBrand,
                                 intakeHistory.intakeTime,
-                                intakeHistory.cafeBeverage.beverageNutrition))
+                                intakeHistory.cafeBeverage.beverageNutrition,
+                                intakeHistory.cafeBeverage.sugarLevel))
                 .from(intakeHistory)
                 .where(
                         intakeHistory.member.id.eq(memberId),
