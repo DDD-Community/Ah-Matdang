@@ -2,16 +2,17 @@ name: Gemini AI Code Reviewer
 
 on:
   issue_comment:
-    types: [created]
+    types: [ created ]
 
 permissions: write-all
 
 jobs:
   gemini-code-review:
     runs-on: ubuntu-latest
-    if: |
+    if: ${{
       github.event.issue.pull_request &&
       contains(github.event.comment.body, '/ai-review')
+      }}
     steps:
       - name: PR Info
         run: |
