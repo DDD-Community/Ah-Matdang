@@ -9,11 +9,15 @@ import be.ddd.common.util.StringBase64EncodingUtil;
 import be.ddd.domain.entity.crawling.CafeBrand;
 import be.ddd.domain.entity.crawling.SugarLevel;
 import jakarta.validation.constraints.Positive;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/cafe-beverages")
 @RequiredArgsConstructor
@@ -75,9 +79,18 @@ public class CafeBeverageAPI {
     }
 
     @GetMapping("/search")
-    public ApiResponse<BeverageSearchResultDto> searchBeverages(@RequestParam String keyword) {
+    public ApiResponse<BeverageSearchResultDto> searchBeverages(
+            @RequestParam(required = false) String keyword) {
+
+        String targetKeyword = (keyword == null ? "" : keyword).trim();
+
+        if (!StringUtils.hasText(targetKeyword)) {
+            log.info("Empty keyword");
+            return ApiResponse.success(new BeverageSearchResultDto(List.of(), 0));
+        }
+
         BeverageSearchResultDto beverageSearchResultDto =
-                cafeBeverageQueryService.searchBeverages(keyword, MEMBER_ID);
+                cafeBeverageQueryService.searchBeverages(targetKeyword, MEMBER_ID);
         return ApiResponse.success(beverageSearchResultDto);
     }
 }
