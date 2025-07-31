@@ -36,9 +36,13 @@ public class GlobalExceptionHandler {
         if (exceptionMap.containsKey(e.getClass())) {
             ErrorCode errorCode = exceptionMap.get(e.getClass());
             Object data = parseErrorData(e);
+            String message =
+                    (e.getMessage() != null && !e.getMessage().isBlank())
+                            ? e.getMessage()
+                            : errorCode.getMessage();
             ErrorResponse errorRes =
                     ErrorResponse.of(
-                            errorCode.getMessage(),
+                            message,
                             errorCode.getStatus().value(),
                             Instant.now(),
                             request.getRequestURI());
