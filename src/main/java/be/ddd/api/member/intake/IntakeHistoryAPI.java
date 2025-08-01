@@ -1,5 +1,6 @@
 package be.ddd.api.member.intake;
 
+import be.ddd.api.dto.req.IntakeHistoryDeleteReqDto;
 import be.ddd.api.dto.req.IntakeRegistrationRequestDto;
 import be.ddd.api.dto.res.DailyIntakeDto;
 import be.ddd.application.member.intake.IntakeHistoryCommandService;
@@ -62,8 +63,9 @@ public class IntakeHistoryAPI {
     }
 
     @DeleteMapping("/{productId}")
-    public ApiResponse<?> deleteMemberIntakeHistory(@PathVariable("productId") UUID productId) {
-        intakeHistoryCommand.deleteIntakeHistory(MEMBER_ID, productId);
+    public ApiResponse<?> deleteMemberIntakeHistory(
+            @PathVariable("productId") UUID productId, @RequestBody IntakeHistoryDeleteReqDto req) {
+        intakeHistoryCommand.deleteIntakeHistory(MEMBER_ID, productId, req.intakeTime());
 
         return ApiResponse.success("deleted");
     }

@@ -9,6 +9,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -69,5 +70,16 @@ public class IntakeHistoryRepositoryImpl implements IntakeHistoryRepositoryCusto
                         intakeHistory.intakeTime.between(startDateTime, endDateTime))
                 .orderBy(intakeHistory.intakeTime.asc())
                 .fetch();
+    }
+
+    @Override
+    public long deleteIntakeHistory(Long memberId, UUID productId, LocalDateTime intakeTime) {
+        return queryFactory
+                .delete(intakeHistory)
+                .where(
+                        intakeHistory.member.id.eq(memberId),
+                        intakeHistory.cafeBeverage.productId.eq(productId),
+                        intakeHistory.intakeTime.eq(intakeTime))
+                .execute();
     }
 }

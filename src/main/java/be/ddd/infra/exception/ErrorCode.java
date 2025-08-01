@@ -47,7 +47,13 @@ public enum ErrorCode {
             Set.of(MemberBeverageLikeNotFoundException.class)),
 
     // like
-    LIKE_NOT_FOUND(HttpStatus.BAD_REQUEST, "찜 정보를 찾을 수 없습니다.", Set.of(LikeNotFoundException.class));
+    LIKE_NOT_FOUND(HttpStatus.BAD_REQUEST, "찜 정보를 찾을 수 없습니다.", Set.of(LikeNotFoundException.class)),
+
+    // intakeHistory
+    INTAKE_HISTORY_NOT_FOUND(
+            HttpStatus.BAD_REQUEST,
+            "음료 섭취 기록을 찾을 수 없습니다.",
+            Set.of(IntakeHistoryNotFoundException.class));
 
     private final HttpStatusCode status;
     private final String code;
