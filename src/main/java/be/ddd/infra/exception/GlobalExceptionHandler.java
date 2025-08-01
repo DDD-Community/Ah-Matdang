@@ -3,10 +3,7 @@ package be.ddd.infra.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.time.Instant;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -36,10 +33,14 @@ public class GlobalExceptionHandler {
         if (exceptionMap.containsKey(e.getClass())) {
             ErrorCode errorCode = exceptionMap.get(e.getClass());
             Object data = parseErrorData(e);
-            String message =
-                    (e.getMessage() != null && !e.getMessage().isBlank())
-                            ? e.getMessage()
-                            : errorCode.getMessage();
+            String message;
+            if (data instanceof List<?> errorList
+                    && !errorList.isEmpty()
+                    && errorList.get(0) instanceof FieldError fe) {
+                message = (errorList.size() == 1) ? fe.message() : errorCode.getMessage();
+            } else {
+                message = errorCode.getMessage();
+            }
             ErrorResponse errorRes =
                     ErrorResponse.of(
                             message,
