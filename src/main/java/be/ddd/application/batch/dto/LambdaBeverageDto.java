@@ -21,6 +21,6 @@ public record LambdaBeverageDto(
                         .map(BeverageType::valueOf)
                         .orElse(BeverageType.ANY);
 
-        return CafeBeverage.of(name, UUID.randomUUID(), cafeStore, image, nutrition, type);
+        return CafeBeverage.of(name, UUID.randomUUID(), cafeStore, image, type, nutrition);
     }
 }
