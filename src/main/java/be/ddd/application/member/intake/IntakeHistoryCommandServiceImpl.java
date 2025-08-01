@@ -12,6 +12,7 @@ import be.ddd.domain.repo.CafeBeverageRepository;
 import be.ddd.domain.repo.IntakeHistoryRepository;
 import be.ddd.domain.repo.MemberRepository;
 import java.time.LocalDateTime;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +43,19 @@ public class IntakeHistoryCommandServiceImpl implements IntakeHistoryCommandServ
         IntakeHistory history = intakeHistoryRepository.save(intakeHistory);
 
         return history.getId();
+    }
+
+    @Override
+    public void deleteIntakeHistory(Long memberId, UUID productId) {
+        Member member =
+                memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+
+        CafeBeverage beverage =
+                cafeBeverageRepository
+                        .findByProductId(productId)
+                        .orElseThrow(CafeBeverageNotFoundException::new);
+
+        intakeHistoryRepository.deleteByMemberAndCafeBeverage(member, beverage);
     }
 
     private boolean isFuture(LocalDateTime intakeTime) {
