@@ -1,6 +1,8 @@
 package be.ddd.infra.exception;
 
+import be.ddd.common.validation.NotFutureDate;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import java.time.Instant;
 import java.util.*;
@@ -59,6 +61,34 @@ public class GlobalExceptionHandler {
                                 ErrorCode.INTERNAL_SERVER_ERROR.getStatus().value(),
                                 Instant.now(),
                                 request.getRequestURI()));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(
+            ConstraintViolationException e, HttpServletRequest request) {
+
+        Optional<String> futureDateMsg =
+                e.getConstraintViolations().stream()
+                        .filter(
+                                v ->
+                                        v.getConstraintDescriptor().getAnnotation()
+                                                instanceof NotFutureDate)
+                        .map(ConstraintViolation::getMessage)
+                        .findFirst();
+
+        ErrorCode errorCode =
+                futureDateMsg.isPresent()
+                        ? ErrorCode.FUTURE_DATE_NOT_ALLOWED
+                        : ErrorCode.INVALID_INPUT_VALUE;
+
+        String message = futureDateMsg.orElse(errorCode.getMessage());
+        ErrorResponse errorRes =
+                ErrorResponse.of(
+                        message,
+                        errorCode.getStatus().value(),
+                        Instant.now(),
+                        request.getRequestURI());
+        return ResponseEntity.status(errorCode.getStatus()).body(errorRes);
     }
 
     private Object parseErrorData(Exception e) {
