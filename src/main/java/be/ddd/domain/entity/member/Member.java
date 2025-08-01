@@ -2,6 +2,7 @@ package be.ddd.domain.entity.member;
 
 import be.ddd.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -33,5 +34,15 @@ public class Member extends BaseTimeEntity {
 
     private String profileUrl;
 
+    @Column(name = "birth_day")
+    private LocalDate birthDay;
+
     private MemberHealthMetric memberHealthMetric;
+
+    public void ofProfile(
+            String nickname, LocalDate birthDay, MemberHealthMetric memberHealthMetric) {
+        this.nickname = nickname;
+        this.birthDay = birthDay;
+        this.memberHealthMetric = memberHealthMetric;
+    }
 }
