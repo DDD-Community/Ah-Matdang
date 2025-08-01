@@ -13,6 +13,7 @@ public record IntakeRecordDto(
         CafeBrand cafeBrand,
         LocalDateTime intakeTime,
         BeverageNutrition nutrition,
+        String imgUrl,
         SugarLevel sugarLevel) {
 
     @QueryProjection

@@ -2,12 +2,14 @@ package be.ddd.application.beverage;
 
 import be.ddd.api.dto.res.BeverageCountDto;
 import be.ddd.api.dto.res.BeverageSearchResultDto;
+import be.ddd.api.dto.res.BeverageSizeDetailDto;
 import be.ddd.api.dto.res.CafeBeverageCursorPageDto;
 import be.ddd.api.dto.res.CafeBeverageDetailsDto;
 import be.ddd.application.beverage.dto.BeverageSearchDto;
 import be.ddd.application.beverage.dto.CafeBeveragePageDto;
 import be.ddd.application.beverage.dto.CafeStoreDto;
 import be.ddd.common.util.StringBase64EncodingUtil;
+import be.ddd.domain.entity.crawling.BeverageNutrition;
 import be.ddd.domain.entity.crawling.CafeBeverage;
 import be.ddd.domain.entity.crawling.CafeBrand;
 import be.ddd.domain.entity.crawling.SugarLevel;
@@ -18,12 +20,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Log4j2
 public class CafeBeverageQueryServiceImpl implements CafeBeverageQueryService {
     private final CafeBeverageRepository beverageRepository;
     private final StringBase64EncodingUtil encodingUtil;
@@ -59,17 +63,38 @@ public class CafeBeverageQueryServiceImpl implements CafeBeverageQueryService {
 
     @Override
     public CafeBeverageDetailsDto getCafeBeverageByProductId(UUID productId) {
+
+        log.info("product detail query:{}", productId);
         CafeBeverage fetch =
                 beverageRepository
                         .findByProductId(productId)
                         .orElseThrow(CafeBeverageNotFoundException::new);
+
+        BeverageNutrition defaultNutrition;
+        List<BeverageSizeDetailDto> sizes;
+
+        if (fetch.getSizes().isEmpty()) {
+            defaultNutrition = BeverageNutrition.empty();
+            sizes = List.of();
+        } else {
+            defaultNutrition = fetch.getSizes().get(0).getBeverageNutrition();
+            sizes =
+                    fetch.getSizes().stream()
+                            .map(
+                                    sizeInfo ->
+                                            new BeverageSizeDetailDto(
+                                                    sizeInfo.getSizeType(),
+                                                    sizeInfo.getBeverageNutrition()))
+                            .toList();
+        }
 
         return CafeBeverageDetailsDto.from(
                 fetch.getName(),
                 fetch.getProductId(),
                 fetch.getImgUrl(),
                 fetch.getBeverageType(),
-                fetch.getBeverageNutrition(),
+                defaultNutrition,
+                sizes,
                 new CafeStoreDto(fetch.getCafeStore().getCafeBrand()));
     }
 

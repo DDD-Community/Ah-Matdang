@@ -24,7 +24,7 @@ public record CafeBeveragePageDto(
                 e.getImgUrl(),
                 e.getBeverageType(),
                 new CafeStoreDto(e.getCafeStore().getCafeBrand()),
-                e.getBeverageNutrition(),
+                e.getSizes().get(0).getBeverageNutrition(),
                 isLiked);
     }
 }

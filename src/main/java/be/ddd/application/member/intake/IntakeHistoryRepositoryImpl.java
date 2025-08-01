@@ -2,6 +2,7 @@ package be.ddd.application.member.intake;
 
 import be.ddd.api.dto.res.IntakeRecordDto;
 import be.ddd.api.dto.res.QIntakeRecordDto;
+import be.ddd.domain.entity.crawling.QBeverageSizeInfo;
 import be.ddd.domain.entity.member.intake.QIntakeHistory;
 import be.ddd.domain.repo.IntakeHistoryRepositoryCustom;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -17,6 +18,7 @@ public class IntakeHistoryRepositoryImpl implements IntakeHistoryRepositoryCusto
 
     private final JPAQueryFactory queryFactory;
     private final QIntakeHistory intakeHistory = QIntakeHistory.intakeHistory;
+    private final QBeverageSizeInfo beverageSizeInfo = QBeverageSizeInfo.beverageSizeInfo;
 
     @Override
     public List<IntakeRecordDto> findByMemberIdAndDate(Long memberId, LocalDateTime intakeTime) {
@@ -31,9 +33,11 @@ public class IntakeHistoryRepositoryImpl implements IntakeHistoryRepositoryCusto
                                 intakeHistory.cafeBeverage.name,
                                 intakeHistory.cafeBeverage.cafeStore.cafeBrand,
                                 intakeHistory.intakeTime,
-                                intakeHistory.cafeBeverage.beverageNutrition,
+                                beverageSizeInfo.beverageNutrition,
+                                intakeHistory.cafeBeverage.imgUrl,
                                 intakeHistory.cafeBeverage.sugarLevel))
                 .from(intakeHistory)
+                .leftJoin(intakeHistory.cafeBeverage.sizes, beverageSizeInfo)
                 .where(
                         intakeHistory.member.id.eq(memberId),
                         intakeHistory.intakeTime.between(startOfDay, endOfDay))
@@ -55,9 +59,11 @@ public class IntakeHistoryRepositoryImpl implements IntakeHistoryRepositoryCusto
                                 intakeHistory.cafeBeverage.name,
                                 intakeHistory.cafeBeverage.cafeStore.cafeBrand,
                                 intakeHistory.intakeTime,
-                                intakeHistory.cafeBeverage.beverageNutrition,
+                                beverageSizeInfo.beverageNutrition,
+                                intakeHistory.cafeBeverage.imgUrl,
                                 intakeHistory.cafeBeverage.sugarLevel))
                 .from(intakeHistory)
+                .leftJoin(intakeHistory.cafeBeverage.sizes, beverageSizeInfo)
                 .where(
                         intakeHistory.member.id.eq(memberId),
                         intakeHistory.intakeTime.between(startDateTime, endDateTime))

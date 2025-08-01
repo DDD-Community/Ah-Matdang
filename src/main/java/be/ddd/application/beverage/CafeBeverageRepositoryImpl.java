@@ -8,6 +8,7 @@ import be.ddd.application.beverage.dto.CafeBeveragePageDto;
 import be.ddd.application.beverage.dto.CafeStoreDto;
 import be.ddd.application.beverage.dto.QBeverageSearchDto;
 import be.ddd.domain.entity.crawling.CafeBrand;
+import be.ddd.domain.entity.crawling.QBeverageSizeInfo;
 import be.ddd.domain.entity.crawling.QCafeBeverage;
 import be.ddd.domain.entity.crawling.SugarLevel;
 import be.ddd.domain.entity.member.QMemberBeverageLike;
@@ -28,6 +29,7 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
 
     private final JPAQueryFactory queryFactory;
     private final QCafeBeverage beverage = QCafeBeverage.cafeBeverage;
+    private final QBeverageSizeInfo beverageSizeInfo = QBeverageSizeInfo.beverageSizeInfo;
     private final QMemberBeverageLike memberBeverageLike = QMemberBeverageLike.memberBeverageLike;
 
     @Override
@@ -45,9 +47,10 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
                                 beverage.beverageType,
                                 Projections.constructor(
                                         CafeStoreDto.class, beverage.cafeStore.cafeBrand),
-                                beverage.beverageNutrition,
+                                beverageSizeInfo.beverageNutrition,
                                 memberBeverageLike.isNotNull()))
                 .from(beverage)
+                .leftJoin(beverage.sizes, beverageSizeInfo)
                 .leftJoin(memberBeverageLike)
                 .on(
                         beverage.id
@@ -118,10 +121,10 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
             return null;
         }
         if (sugarLevel == SugarLevel.ZERO) {
-            return beverage.beverageNutrition.sugarG.eq(0);
+            return beverage.sizes.any().beverageNutrition.sugarG.eq(0);
         }
         if (sugarLevel == SugarLevel.LOW) {
-            return beverage.beverageNutrition.sugarG.between(1, 20);
+            return beverage.sizes.any().beverageNutrition.sugarG.between(1, 20);
         }
         return null;
     }
@@ -144,9 +147,10 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
                                 beverage.beverageType,
                                 Projections.constructor(
                                         CafeStoreDto.class, beverage.cafeStore.cafeBrand),
-                                beverage.beverageNutrition,
+                                beverageSizeInfo.beverageNutrition,
                                 isLiked))
                 .from(beverage)
+                .leftJoin(beverage.sizes, beverageSizeInfo)
                 .leftJoin(memberBeverageLike)
                 .on(
                         beverage.id
