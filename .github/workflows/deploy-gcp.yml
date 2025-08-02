@@ -58,8 +58,8 @@ jobs:
     name: Deploy to GCP VM
     needs: build-and-push
     runs-on: ubuntu-latest
-    steps:
 
+    steps:
       - name: Authenticate to GCP for Deploy
         uses: google-github-actions/auth@v2
         with:
@@ -86,3 +86,11 @@ jobs:
               -p 8080:8080 \
               -e JASYPT_ENCRYPTOR_PASSWORD="${{ secrets.JASYPT_PASSWORD }}" \
               "$IMAGE_URI"
+
+      - name: Notify Discord
+        if: ${{ success() }}
+        run: |
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d '{"content":"서버 정상배포되었습니다 🎉"}' \
+               ${{ secrets.DISCORD_SERVER_NOTIFY_WEBHOOK}}
