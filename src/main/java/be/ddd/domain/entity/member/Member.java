@@ -39,10 +39,17 @@ public class Member extends BaseTimeEntity {
 
     private MemberHealthMetric memberHealthMetric;
 
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private NotificationSettings notificationSettings;
+
     public void ofProfile(
             String nickname, LocalDate birthDay, MemberHealthMetric memberHealthMetric) {
         this.nickname = nickname;
         this.birthDay = birthDay;
         this.memberHealthMetric = memberHealthMetric;
+    }
+
+    public void notificationSettings(NotificationSettings notificationSettings) {
+        this.notificationSettings = notificationSettings;
     }
 }
