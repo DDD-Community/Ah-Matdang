@@ -1,6 +1,8 @@
 package be.ddd.api.member;
 
+import be.ddd.api.dto.req.MemberProfileModifyDto;
 import be.ddd.api.dto.req.MemberProfileRegistrationDto;
+import be.ddd.api.dto.res.MemberModifyDetailsDto;
 import be.ddd.application.member.MemberCommandService;
 import be.ddd.common.dto.ApiResponse;
 import java.util.UUID;
@@ -22,5 +24,12 @@ public class MemberProfileAPI {
                 memberCommandService.registerMemberProfile(memberProfileRegistrationDto);
 
         return ApiResponse.success(memberFakeId);
+    }
+
+    @PatchMapping
+    public ApiResponse<?> modifyMemberProfile(@RequestBody MemberProfileModifyDto req) {
+        MemberModifyDetailsDto res = memberCommandService.modifyMemberProfile(req);
+
+        return ApiResponse.success(res);
     }
 }

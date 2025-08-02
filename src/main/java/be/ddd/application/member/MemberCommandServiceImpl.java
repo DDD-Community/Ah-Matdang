@@ -1,6 +1,9 @@
 package be.ddd.application.member;
 
+import be.ddd.api.dto.req.MemberProfileModifyDto;
 import be.ddd.api.dto.req.MemberProfileRegistrationDto;
+import be.ddd.api.dto.res.MemberModifyDetailsDto;
+import be.ddd.common.mapper.MemberProfileMapper;
 import be.ddd.domain.entity.member.Member;
 import be.ddd.domain.entity.member.MemberHealthMetric;
 import be.ddd.domain.exception.InvalidInputException;
@@ -21,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberCommandServiceImpl implements MemberCommandService {
 
     private final MemberRepository memberRepository;
+    private final MemberProfileMapper memberProfileMapper;
 
     @Override
     public UUID registerMemberProfile(MemberProfileRegistrationDto memberProfileRegistrationDto) {
@@ -42,6 +46,17 @@ public class MemberCommandServiceImpl implements MemberCommandService {
                         memberProfileRegistrationDto.sugarIntakeLevel()));
 
         return member.getFakeId();
+    }
+
+    @Override
+    public MemberModifyDetailsDto modifyMemberProfile(MemberProfileModifyDto dto) {
+        Member member =
+                memberRepository
+                        .findByFakeId(dto.fakeId())
+                        .orElseThrow(MemberNotFoundException::new);
+
+        memberProfileMapper.modifyFromDto(dto, member);
+        return MemberModifyDetailsDto.from(member);
     }
 
     private Integer calculateAge(LocalDate birthday) {
