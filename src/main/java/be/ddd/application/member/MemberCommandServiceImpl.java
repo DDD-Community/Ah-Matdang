@@ -27,35 +27,31 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     private final MemberProfileMapper memberProfileMapper;
 
     @Override
-    public UUID registerMemberProfile(MemberProfileRegistrationDto memberProfileRegistrationDto) {
+    public UUID registerMemberProfile(UUID fakeId, MemberProfileRegistrationDto req) {
         Member member =
-                memberRepository
-                        .findByFakeId(memberProfileRegistrationDto.fakeId())
-                        .orElseThrow(MemberNotFoundException::new);
+                memberRepository.findByFakeId(fakeId).orElseThrow(MemberNotFoundException::new);
 
-        LocalDate birthDay = memberProfileRegistrationDto.birthDay();
+        LocalDate birthDay = req.birthDay();
         member.ofProfile(
-                memberProfileRegistrationDto.nickname(),
+                req.nickname(),
                 birthDay,
                 new MemberHealthMetric(
                         calculateAge(birthDay),
-                        memberProfileRegistrationDto.heightCm(),
-                        memberProfileRegistrationDto.weightKg(),
-                        memberProfileRegistrationDto.gender(),
-                        memberProfileRegistrationDto.activityRange(),
-                        memberProfileRegistrationDto.sugarIntakeLevel()));
+                        req.heightCm(),
+                        req.weightKg(),
+                        req.gender(),
+                        req.activityRange(),
+                        req.sugarIntakeLevel()));
 
         return member.getFakeId();
     }
 
     @Override
-    public MemberModifyDetailsDto modifyMemberProfile(MemberProfileModifyDto dto) {
+    public MemberModifyDetailsDto modifyMemberProfile(UUID fakeId, MemberProfileModifyDto req) {
         Member member =
-                memberRepository
-                        .findByFakeId(dto.fakeId())
-                        .orElseThrow(MemberNotFoundException::new);
+                memberRepository.findByFakeId(fakeId).orElseThrow(MemberNotFoundException::new);
 
-        memberProfileMapper.modifyFromDto(dto, member);
+        memberProfileMapper.modifyFromDto(req, member);
         return MemberModifyDetailsDto.from(member);
     }
 

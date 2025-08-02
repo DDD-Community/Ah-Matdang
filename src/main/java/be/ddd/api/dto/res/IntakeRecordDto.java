@@ -1,6 +1,7 @@
 package be.ddd.api.dto.res;
 
 import be.ddd.domain.entity.crawling.BeverageNutrition;
+import be.ddd.domain.entity.crawling.BeverageSize;
 import be.ddd.domain.entity.crawling.CafeBrand;
 import be.ddd.domain.entity.crawling.SugarLevel;
 import com.querydsl.core.annotations.QueryProjection;
@@ -14,7 +15,8 @@ public record IntakeRecordDto(
         LocalDateTime intakeTime,
         BeverageNutrition nutrition,
         String imgUrl,
-        SugarLevel sugarLevel) {
+        SugarLevel sugarLevel,
+        BeverageSize beverageSize) {
 
     @QueryProjection
     public IntakeRecordDto {

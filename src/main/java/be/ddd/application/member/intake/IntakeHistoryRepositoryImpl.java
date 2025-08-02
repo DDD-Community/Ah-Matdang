@@ -36,7 +36,8 @@ public class IntakeHistoryRepositoryImpl implements IntakeHistoryRepositoryCusto
                                 intakeHistory.intakeTime,
                                 beverageSizeInfo.beverageNutrition,
                                 intakeHistory.cafeBeverage.imgUrl,
-                                intakeHistory.cafeBeverage.sugarLevel))
+                                intakeHistory.cafeBeverage.sugarLevel,
+                                beverageSizeInfo.sizeType))
                 .from(intakeHistory)
                 .leftJoin(intakeHistory.cafeBeverage.sizes, beverageSizeInfo)
                 .where(
@@ -62,7 +63,8 @@ public class IntakeHistoryRepositoryImpl implements IntakeHistoryRepositoryCusto
                                 intakeHistory.intakeTime,
                                 beverageSizeInfo.beverageNutrition,
                                 intakeHistory.cafeBeverage.imgUrl,
-                                intakeHistory.cafeBeverage.sugarLevel))
+                                intakeHistory.cafeBeverage.sugarLevel,
+                                beverageSizeInfo.sizeType))
                 .from(intakeHistory)
                 .leftJoin(intakeHistory.cafeBeverage.sizes, beverageSizeInfo)
                 .where(

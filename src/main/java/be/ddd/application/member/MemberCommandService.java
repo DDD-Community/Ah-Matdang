@@ -6,7 +6,9 @@ import be.ddd.api.dto.res.MemberModifyDetailsDto;
 import java.util.UUID;
 
 public interface MemberCommandService {
-    UUID registerMemberProfile(MemberProfileRegistrationDto memberProfileRegistrationDto);
+    UUID registerMemberProfile(
+            UUID fakeId, MemberProfileRegistrationDto memberProfileRegistrationDto);
 
-    MemberModifyDetailsDto modifyMemberProfile(MemberProfileModifyDto memberProfileModifyDto);
+    MemberModifyDetailsDto modifyMemberProfile(
+            UUID fakeId, MemberProfileModifyDto memberProfileModifyDto);
 }

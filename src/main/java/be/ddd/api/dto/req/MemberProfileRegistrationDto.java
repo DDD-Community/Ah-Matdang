@@ -7,12 +7,10 @@ import io.micrometer.common.lang.NonNullApi;
 import io.micrometer.common.lang.NonNullFields;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.UUID;
 
 @NonNullApi
 @NonNullFields
 public record MemberProfileRegistrationDto(
-        UUID fakeId,
         String nickname,
         LocalDate birthDay,
         Gender gender,
