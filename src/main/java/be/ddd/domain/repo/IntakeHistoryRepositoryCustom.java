@@ -12,4 +12,6 @@ public interface IntakeHistoryRepositoryCustom {
             Long memberId, LocalDateTime startDate, LocalDateTime endDate);
 
     long deleteIntakeHistory(Long memberId, UUID productId, LocalDateTime intakeTime);
+
+    Double sumSugarByMemberIdAndDate(Long memberId, LocalDateTime date);
 }

@@ -84,4 +84,20 @@ public class IntakeHistoryRepositoryImpl implements IntakeHistoryRepositoryCusto
                         intakeHistory.intakeTime.eq(intakeTime))
                 .execute();
     }
+
+    @Override
+    public Double sumSugarByMemberIdAndDate(Long memberId, LocalDateTime date) {
+        LocalDateTime startOfDay = date.toLocalDate().atStartOfDay();
+        LocalDateTime endOfDay = date.toLocalDate().atTime(LocalTime.MAX);
+
+        return queryFactory
+                .select(beverageSizeInfo.beverageNutrition.sugarG.sum())
+                .from(intakeHistory)
+                .leftJoin(intakeHistory.cafeBeverage.sizes, beverageSizeInfo)
+                .where(
+                        intakeHistory.member.id.eq(memberId),
+                        intakeHistory.intakeTime.between(startOfDay, endOfDay))
+                .fetchOne()
+                .doubleValue();
+    }
 }
