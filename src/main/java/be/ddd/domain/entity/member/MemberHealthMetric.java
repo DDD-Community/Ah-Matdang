@@ -32,6 +32,12 @@ public class MemberHealthMetric {
     @Column(name = "sugar_intake_level")
     private SugarIntakeLevel sugarIntakeLevel;
 
+    @Column(name = "sugar_max_g")
+    private Double sugarMaxG = 0.0;
+
+    @Column(name = "sugar_ideal_g")
+    private Double sugarIdealG = 0.0;
+
     public MemberHealthMetric(
             Integer age,
             Integer heightCm,

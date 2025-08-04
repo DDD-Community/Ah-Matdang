@@ -1,0 +1,3 @@
+-- members 테이블에 당류 권장량 컬럼 추가
+ALTER TABLE members ADD COLUMN sugar_max_g DOUBLE PRECISION NOT NULL DEFAULT 0.0;
+ALTER TABLE members ADD COLUMN sugar_ideal_g DOUBLE PRECISION NOT NULL DEFAULT 0.0;
