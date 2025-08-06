@@ -92,7 +92,13 @@ public class Auth0Service {
             .compact();
 
         // 4. 응답 DTO로 반환
-        return new LoginDto(jwt, email, userId);
+        return new LoginDto(jwt, userInfo);
+    }
+
+    public void logout() {
+        // 현재 시스템은 Stateless JWT 인증을 사용하므로,
+        // 서버 측에서는 토큰을 직접 무효화하지 않습니다.
+        // 로그아웃은 클라이언트 측에서 저장된 JWT를 삭제하는 방식으로 처리됩니다.
     }
 
 }
