@@ -22,4 +22,10 @@ public class LoginController {
         return ResponseEntity.ok(loginDto);
     }
 
+    @GetMapping("/logout")
+    public ResponseEntity<Void> logout() {
+        auth0Service.logout();
+        return ResponseEntity.ok().build();
+    }
+
 }
