@@ -12,11 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.security.Key;
-import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -34,16 +32,13 @@ public class Auth0Service {
     @Value("${auth0.redirect-uri}")
     private String redirectUri;
 
-    @Value("${auth0.jwt-secret}")
+    @Value("${auth.jwt.secret}")
     private String jwtSecret;
 
     @Value("${auth.jwt.access.expiration-ms}")
     private long accessExpirationMs;
 
-    @Value("${auth.jwt.refresh.expiration-ms}")
-    private long refreshExpirationMs;
-
-    private final TokenStore tokenStore;
+    private final TokenService tokenService;
     private final RestTemplate restTemplate = new RestTemplate();
     private Key jwtKey;
 
@@ -102,9 +97,7 @@ public class Auth0Service {
 
 
         // 4. Refresh Token 생성 및 로컬 캐시에 저장
-        String refreshToken = UUID.randomUUID().toString();
-        Instant refreshExpiresAt = Instant.now().plusSeconds(refreshExpirationMs);
-        tokenStore.save(refreshToken, userId, refreshExpiresAt);
+        String refreshToken = tokenService.issueAndStoreRefreshToken(userId);
 
         // 5. userInfo에 refresh_token 포함시켜 응답
         userInfo.put("refresh_token", refreshToken);
