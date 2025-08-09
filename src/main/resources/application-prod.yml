@@ -37,3 +37,17 @@ jasypt:
     password: ${JASYPT_ENCRYPTOR_PASSWORD}
     bean: jasyptStringEncryptor
 
+auth0:
+  domain: dev-o4pgsljdj1aisk3y.us.auth0.com
+  client-id: ${AUTH0_CLIENT_ID}
+  client-secret: ${AUTH0_CLIENT_SECRET}
+  redirect-uri: dev-o4pgsljdj1aisk3y.us.auth0.com/auth/login
+
+auth:
+  jwt:
+    secret: ${JWT_SECRET}
+    access:
+      expiration-ms: 900000         # 액세스 토큰: 15분 예시
+    refresh:
+      expiration-ms: 1209600000     # 리프레시 토큰: 14일(14*24*60*60*1000)
+
