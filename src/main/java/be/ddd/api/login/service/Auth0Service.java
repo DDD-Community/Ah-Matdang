@@ -12,9 +12,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.security.Key;
+import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +37,7 @@ public class Auth0Service {
     @Value("${auth0.jwt-secret}")
     private String jwtSecret;
 
+    private final TokenStore tokenStore;
     private final RestTemplate restTemplate = new RestTemplate();
     private Key jwtKey;
 
@@ -91,7 +94,15 @@ public class Auth0Service {
             .signWith(jwtKey, SignatureAlgorithm.HS256)
             .compact();
 
-        // 4. 응답 DTO로 반환
+
+        // 4. Refresh Token 생성 및 로컬 캐시에 저장
+        String refreshToken = UUID.randomUUID().toString();
+        Instant refreshExpiresAt = Instant.now().plusSeconds(60 * 60 * 24 * 14);
+        tokenStore.save(refreshToken, userId, refreshExpiresAt);
+
+        // 5. userInfo에 refresh_token 포함시켜 응답
+        userInfo.put("refresh_token", refreshToken);
+
         return new LoginDto(jwt, userInfo);
     }
 
