@@ -37,6 +37,12 @@ public class Auth0Service {
     @Value("${auth0.jwt-secret}")
     private String jwtSecret;
 
+    @Value("${auth.jwt.access.expiration-ms}")
+    private long accessExpirationMs;
+
+    @Value("${auth.jwt.refresh.expiration-ms}")
+    private long refreshExpirationMs;
+
     private final TokenStore tokenStore;
     private final RestTemplate restTemplate = new RestTemplate();
     private Key jwtKey;
@@ -90,14 +96,14 @@ public class Auth0Service {
             .setSubject(userId)
             .claim("email", email)
             .setIssuedAt(new Date())
-            .setExpiration(new Date(System.currentTimeMillis() + 3600_000)) // 1시간
+            .setExpiration(new Date(System.currentTimeMillis() + accessExpirationMs))
             .signWith(jwtKey, SignatureAlgorithm.HS256)
             .compact();
 
 
         // 4. Refresh Token 생성 및 로컬 캐시에 저장
         String refreshToken = UUID.randomUUID().toString();
-        Instant refreshExpiresAt = Instant.now().plusSeconds(60 * 60 * 24 * 14);
+        Instant refreshExpiresAt = Instant.now().plusSeconds(refreshExpirationMs);
         tokenStore.save(refreshToken, userId, refreshExpiresAt);
 
         // 5. userInfo에 refresh_token 포함시켜 응답
@@ -107,9 +113,6 @@ public class Auth0Service {
     }
 
     public void logout() {
-        // 현재 시스템은 Stateless JWT 인증을 사용하므로,
-        // 서버 측에서는 토큰을 직접 무효화하지 않습니다.
-        // 로그아웃은 클라이언트 측에서 저장된 JWT를 삭제하는 방식으로 처리됩니다.
     }
 
 }
