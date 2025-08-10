@@ -22,7 +22,7 @@ public class CafeBeverageBatchService {
     private final WebClient.Builder webClientBuilder;
 
     private final String lambdaUrl =
-            "https://dla6sbxferlsb2jl6wtmjvmioe0hdmdc.lambda-url.ap-northeast-2.on.aws/";
+            "https://u6wvrcscqwe7rdbblr3xebajf40avfxz.lambda-url.ap-northeast-2.on.aws/";
     private final CafeStoreRepository cafeStoreRepository;
 
     public List<LambdaBeverageDto> fetchAll() {
