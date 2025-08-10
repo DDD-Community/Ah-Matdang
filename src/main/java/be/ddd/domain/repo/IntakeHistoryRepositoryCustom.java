@@ -3,6 +3,7 @@ package be.ddd.domain.repo;
 import be.ddd.api.dto.res.IntakeRecordDto;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 public interface IntakeHistoryRepositoryCustom {
@@ -13,5 +14,5 @@ public interface IntakeHistoryRepositoryCustom {
 
     long deleteIntakeHistory(Long memberId, UUID productId, LocalDateTime intakeTime);
 
-    Double sumSugarByMemberIdAndDate(Long memberId, LocalDateTime date);
+    Map<Long, Double> sumSugarByMemberIdsAndDate(List<Long> memberIds, LocalDateTime date);
 }
