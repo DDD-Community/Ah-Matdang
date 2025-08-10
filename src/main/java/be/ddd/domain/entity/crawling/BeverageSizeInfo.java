@@ -38,6 +38,10 @@ public class BeverageSizeInfo extends BaseTimeEntity {
         this.beverageNutrition = beverageNutrition;
     }
 
+    public void setCafeBeverage(CafeBeverage cafeBeverage) {
+        this.cafeBeverage = cafeBeverage;
+    }
+
     public void updateBeverageNutrition(BeverageNutrition beverageNutrition) {
         this.beverageNutrition = beverageNutrition;
     }
