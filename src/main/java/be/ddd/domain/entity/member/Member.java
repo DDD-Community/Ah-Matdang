@@ -34,6 +34,8 @@ public class Member extends BaseTimeEntity {
 
     private String profileUrl;
 
+    private String deviceToken; // FCM 디바이스 토큰
+
     @Column(name = "birth_day")
     private LocalDate birthDay;
 
@@ -47,6 +49,10 @@ public class Member extends BaseTimeEntity {
         this.nickname = nickname;
         this.birthDay = birthDay;
         this.memberHealthMetric = memberHealthMetric;
+    }
+
+    public void updateDeviceToken(String deviceToken) {
+        this.deviceToken = deviceToken;
     }
 
     public void notificationSettings(NotificationSettings notificationSettings) {
