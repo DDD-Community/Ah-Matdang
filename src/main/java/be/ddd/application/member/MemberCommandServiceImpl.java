@@ -3,6 +3,7 @@ package be.ddd.application.member;
 import be.ddd.api.dto.req.MemberProfileModifyDto;
 import be.ddd.api.dto.req.MemberProfileRegistrationDto;
 import be.ddd.api.dto.res.MemberModifyDetailsDto;
+import be.ddd.application.member.dto.res.RecommendedSugar;
 import be.ddd.common.mapper.MemberProfileMapper;
 import be.ddd.domain.entity.member.Member;
 import be.ddd.domain.entity.member.MemberHealthMetric;
@@ -25,6 +26,7 @@ public class MemberCommandServiceImpl implements MemberCommandService {
 
     private final MemberRepository memberRepository;
     private final MemberProfileMapper memberProfileMapper;
+    private final SugarRecommendationService sugarRecommendationService;
 
     @Override
     public UUID registerMemberProfile(UUID fakeId, MemberProfileRegistrationDto req) {
@@ -32,16 +34,19 @@ public class MemberCommandServiceImpl implements MemberCommandService {
                 memberRepository.findByFakeId(fakeId).orElseThrow(MemberNotFoundException::new);
 
         LocalDate birthDay = req.birthDay();
-        member.ofProfile(
-                req.nickname(),
-                birthDay,
+        MemberHealthMetric healthMetric =
                 new MemberHealthMetric(
                         calculateAge(birthDay),
                         req.heightCm(),
                         req.weightKg(),
                         req.gender(),
                         req.activityRange(),
-                        req.sugarIntakeLevel()));
+                        req.sugarIntakeLevel());
+
+        member.ofProfile(req.nickname(), birthDay, healthMetric);
+
+        // 당류 권장량 계산 및 저장 로직 추가
+        updateSugarRecommendation(member);
 
         return member.getFakeId();
     }
@@ -52,7 +57,18 @@ public class MemberCommandServiceImpl implements MemberCommandService {
                 memberRepository.findByFakeId(fakeId).orElseThrow(MemberNotFoundException::new);
 
         memberProfileMapper.modifyFromDto(req, member);
+
+        // 당류 권장량 계산 및 저장 로직 추가
+        updateSugarRecommendation(member);
+
         return MemberModifyDetailsDto.from(member);
+    }
+
+    private void updateSugarRecommendation(Member member) {
+        RecommendedSugar recommendedSugar = sugarRecommendationService.calculate(member);
+        MemberHealthMetric healthMetric = member.getMemberHealthMetric();
+        healthMetric.calculatePersonalSugar(
+                recommendedSugar.sugarMaxG(), recommendedSugar.sugarIdealG());
     }
 
     private Integer calculateAge(LocalDate birthday) {

@@ -52,4 +52,9 @@ public class MemberHealthMetric {
         this.activityRange = activityRange;
         this.sugarIntakeLevel = sugarIntakeLevel;
     }
+
+    public void calculatePersonalSugar(Double sugarMaxG, Double sugarIdealG) {
+        this.sugarMaxG = sugarMaxG;
+        this.sugarIdealG = sugarIdealG;
+    }
 }
