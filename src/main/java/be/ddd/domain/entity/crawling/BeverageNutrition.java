@@ -3,7 +3,6 @@ package be.ddd.domain.entity.crawling;
 import be.ddd.application.batch.dto.BeverageNutritionDto;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,12 +32,34 @@ public class BeverageNutrition {
 
     public static BeverageNutrition from(BeverageNutritionDto dto) {
         return new BeverageNutrition(
-                Objects.requireNonNullElse(dto.servingKcal(), 0),
-                Objects.requireNonNullElse(dto.saturatedFatG(), 0.0),
-                Objects.requireNonNullElse(dto.proteinG(), 0.0),
-                Objects.requireNonNullElse(dto.sodiumMg(), 0),
-                Objects.requireNonNullElse(dto.sugarG(), 0),
-                Objects.requireNonNullElse(dto.caffeineMg(), 0));
+                parseInt(dto.servingKcal()),
+                parseDouble(dto.saturatedFatG()),
+                parseDouble(dto.proteinG()),
+                parseInt(dto.sodiumMg()),
+                parseInt(dto.sugarG()),
+                parseInt(dto.caffeineMg()));
+    }
+
+    private static Integer parseInt(String value) {
+        if (value == null || value.isBlank()) {
+            return 0;
+        }
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    private static Double parseDouble(String value) {
+        if (value == null || value.isBlank()) {
+            return 0.0;
+        }
+        try {
+            return Double.parseDouble(value);
+        } catch (NumberFormatException e) {
+            return 0.0;
+        }
     }
 
     public BeverageNutrition(

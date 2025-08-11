@@ -47,6 +47,12 @@ public class CafeBeverage extends BaseTimeEntity {
     private List<BeverageSizeInfo> sizes = new ArrayList<>();
 
     public void updateFromDto(LambdaBeverageDto dto) {
+        /* log.info(
+                        "[DEBUG] Updating beverage: '{}'. DTO contains sizes: {}. DB entity has sizes: {}",
+                        this.name,
+                        dto.beverageNutritions().keySet(),
+                        this.sizes.stream().map(BeverageSizeInfo::getSizeType).collect(Collectors.toList()));
+        */
         if (dto.image() != null) {
             this.imgUrl = dto.image();
         }
@@ -71,7 +77,7 @@ public class CafeBeverage extends BaseTimeEntity {
                                 if (existingSizes.containsKey(size)) {
                                     existingSizes.get(size).updateBeverageNutrition(nutrition);
                                 } else {
-                                    this.sizes.add(new BeverageSizeInfo(this, size, nutrition));
+                                    addSizeInfo(new BeverageSizeInfo(this, size, nutrition));
                                 }
                             });
 
@@ -85,6 +91,12 @@ public class CafeBeverage extends BaseTimeEntity {
                                             SugarLevel.valueOfSugar(
                                                     sizeInfo.getBeverageNutrition().getSugarG()));
         }
+    }
+
+    // == 연관관계 편의 메소드 == //
+    public void addSizeInfo(BeverageSizeInfo sizeInfo) {
+        this.sizes.add(sizeInfo);
+        sizeInfo.setCafeBeverage(this);
     }
 
     public static CafeBeverage of(
@@ -102,7 +114,6 @@ public class CafeBeverage extends BaseTimeEntity {
         beverage.imgUrl = imgUrl;
         beverage.beverageType = beverageType;
 
-        // 사이즈별 영양 정보를 기반으로 BeverageSizeInfo 생성 및 관계 설정
         beverageNutritions.forEach(
                 (sizeStr, nutritionDto) -> {
                     BeverageSize size = BeverageSize.fromString(sizeStr);
@@ -111,7 +122,6 @@ public class CafeBeverage extends BaseTimeEntity {
                     beverage.sizes.add(sizeInfo);
                 });
 
-        // 대표 당 레벨 설정 (예: TALL 사이즈 기준, 없으면 첫번째 사이즈 기준)
         beverage.sizes.stream()
                 .filter(s -> s.getSizeType() == BeverageSize.TALL)
                 .findFirst()
