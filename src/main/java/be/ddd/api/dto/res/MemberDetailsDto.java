@@ -1,5 +1,6 @@
 package be.ddd.api.dto.res;
 
+import be.ddd.api.dto.res.notification.NotificationSettingsResponseDto;
 import be.ddd.domain.entity.member.ActivityRange;
 import be.ddd.domain.entity.member.Gender;
 import be.ddd.domain.entity.member.Member;
@@ -15,7 +16,8 @@ public record MemberDetailsDto(
         Integer heightCm,
         BigDecimal weightKg,
         ActivityRange activityRange,
-        SugarIntakeLevel sugarIntakeLevel) {
+        SugarIntakeLevel sugarIntakeLevel,
+        NotificationSettingsResponseDto notificationSettings) {
 
     public static MemberDetailsDto from(Member member) {
         return new MemberDetailsDto(
@@ -25,6 +27,7 @@ public record MemberDetailsDto(
                 member.getMemberHealthMetric().getHeightCm(),
                 member.getMemberHealthMetric().getWeightKg(),
                 member.getMemberHealthMetric().getActivityRange(),
-                member.getMemberHealthMetric().getSugarIntakeLevel());
+                member.getMemberHealthMetric().getSugarIntakeLevel(),
+                NotificationSettingsResponseDto.from(member.getNotificationSettings()));
     }
 }
