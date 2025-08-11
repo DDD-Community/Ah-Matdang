@@ -82,6 +82,8 @@ dependencies {
     //mapper
     implementation 'org.mapstruct:mapstruct:1.5.5.Final'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+
+    implementation("com.google.firebase:firebase-admin:9.5.0")
 }
 
 def querydslSrcDir = 'build/generated/querydsl'

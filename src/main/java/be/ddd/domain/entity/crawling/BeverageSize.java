@@ -15,9 +15,9 @@ public enum BeverageSize {
 
     private final String displayName;
 
-    public static BeverageSize fromDisplayName(String displayName) {
-        return Arrays.stream(BeverageSize.values())
-                .filter(size -> size.displayName.equalsIgnoreCase(displayName))
+    public static BeverageSize fromString(String text) {
+        return Arrays.stream(values())
+                .filter(size -> size.name().equalsIgnoreCase(text))
                 .findFirst()
                 .orElse(OTHER);
     }

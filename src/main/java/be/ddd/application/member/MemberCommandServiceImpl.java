@@ -3,9 +3,12 @@ package be.ddd.application.member;
 import be.ddd.api.dto.req.MemberProfileModifyDto;
 import be.ddd.api.dto.req.MemberProfileRegistrationDto;
 import be.ddd.api.dto.res.MemberModifyDetailsDto;
+import be.ddd.api.dto.res.MemberRegistrationDetailsDto;
+import be.ddd.application.member.dto.res.RecommendedSugar;
 import be.ddd.common.mapper.MemberProfileMapper;
 import be.ddd.domain.entity.member.Member;
 import be.ddd.domain.entity.member.MemberHealthMetric;
+import be.ddd.domain.entity.member.NotificationSettings;
 import be.ddd.domain.exception.InvalidInputException;
 import be.ddd.domain.exception.MemberNotFoundException;
 import be.ddd.domain.repo.MemberRepository;
@@ -25,25 +28,32 @@ public class MemberCommandServiceImpl implements MemberCommandService {
 
     private final MemberRepository memberRepository;
     private final MemberProfileMapper memberProfileMapper;
+    private final SugarRecommendationService sugarRecommendationService;
 
     @Override
-    public UUID registerMemberProfile(UUID fakeId, MemberProfileRegistrationDto req) {
+    public MemberRegistrationDetailsDto registerMemberProfile(
+            UUID fakeId, MemberProfileRegistrationDto req) {
         Member member =
                 memberRepository.findByFakeId(fakeId).orElseThrow(MemberNotFoundException::new);
 
         LocalDate birthDay = req.birthDay();
-        member.ofProfile(
-                req.nickname(),
-                birthDay,
+        MemberHealthMetric healthMetric =
                 new MemberHealthMetric(
                         calculateAge(birthDay),
                         req.heightCm(),
                         req.weightKg(),
                         req.gender(),
                         req.activityRange(),
-                        req.sugarIntakeLevel()));
+                        req.sugarIntakeLevel());
 
-        return member.getFakeId();
+        member.ofProfile(req.nickname(), birthDay, healthMetric);
+
+        NotificationSettings notificationSettings = new NotificationSettings(member);
+        member.notificationSettings(notificationSettings);
+
+        RecommendedSugar recommendedSugar = updateSugarRecommendation(member);
+
+        return new MemberRegistrationDetailsDto(member.getFakeId(), recommendedSugar);
     }
 
     @Override
@@ -52,7 +62,20 @@ public class MemberCommandServiceImpl implements MemberCommandService {
                 memberRepository.findByFakeId(fakeId).orElseThrow(MemberNotFoundException::new);
 
         memberProfileMapper.modifyFromDto(req, member);
-        return MemberModifyDetailsDto.from(member);
+
+        RecommendedSugar recommendedSugar = updateSugarRecommendation(member);
+
+        return MemberModifyDetailsDto.from(member, recommendedSugar);
+    }
+
+    private RecommendedSugar updateSugarRecommendation(Member member) {
+        RecommendedSugar baseRecommendation = sugarRecommendationService.calculate(member);
+        MemberHealthMetric healthMetric = member.getMemberHealthMetric();
+
+        healthMetric.calculatePersonalSugar(
+                baseRecommendation.sugarMaxG(), baseRecommendation.sugarIdealG());
+
+        return new RecommendedSugar(healthMetric.getSugarMaxG(), healthMetric.getSugarIdealG());
     }
 
     private Integer calculateAge(LocalDate birthday) {

@@ -1,5 +1,6 @@
 package be.ddd.api.dto.res;
 
+import be.ddd.application.member.dto.res.RecommendedSugar;
 import be.ddd.domain.entity.member.ActivityRange;
 import be.ddd.domain.entity.member.Gender;
 import be.ddd.domain.entity.member.Member;
@@ -15,8 +16,9 @@ public record MemberModifyDetailsDto(
         Integer heightCm,
         BigDecimal weightKg,
         ActivityRange activityRange,
-        SugarIntakeLevel sugarIntakeLevel) {
-    public static MemberModifyDetailsDto from(Member member) {
+        SugarIntakeLevel sugarIntakeLevel,
+        RecommendedSugar recommendedSugar) {
+    public static MemberModifyDetailsDto from(Member member, RecommendedSugar recommendedSugar) {
         return new MemberModifyDetailsDto(
                 member.getNickname(),
                 member.getBirthDay(),
@@ -24,6 +26,7 @@ public record MemberModifyDetailsDto(
                 member.getMemberHealthMetric().getHeightCm(),
                 member.getMemberHealthMetric().getWeightKg(),
                 member.getMemberHealthMetric().getActivityRange(),
-                member.getMemberHealthMetric().getSugarIntakeLevel());
+                member.getMemberHealthMetric().getSugarIntakeLevel(),
+                recommendedSugar);
     }
 }

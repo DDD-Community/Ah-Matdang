@@ -4,6 +4,7 @@ import be.ddd.api.dto.req.MemberProfileModifyDto;
 import be.ddd.api.dto.req.MemberProfileRegistrationDto;
 import be.ddd.api.dto.res.MemberDetailsDto;
 import be.ddd.api.dto.res.MemberModifyDetailsDto;
+import be.ddd.api.dto.res.MemberRegistrationDetailsDto;
 import be.ddd.application.member.MemberCommandService;
 import be.ddd.application.member.MemberQueryService;
 import be.ddd.common.dto.ApiResponse;
@@ -26,9 +27,9 @@ public class MemberProfileAPI {
     public ApiResponse<?> registerMemberProfile(
             @PathVariable("fakeId") UUID fakeId, @RequestBody MemberProfileRegistrationDto req) {
         log.info("fakeId:{}", fakeId);
-        UUID memberFakeId = memberCommandService.registerMemberProfile(fakeId, req);
+        MemberRegistrationDetailsDto res = memberCommandService.registerMemberProfile(fakeId, req);
 
-        return ApiResponse.success(memberFakeId);
+        return ApiResponse.success(res);
     }
 
     @PatchMapping("/{fakeId}")

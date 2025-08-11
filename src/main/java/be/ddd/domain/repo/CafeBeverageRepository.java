@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CafeBeverageRepository
         extends JpaRepository<CafeBeverage, Long>, CafeBeverageRepositoryCustom {
-    Optional<CafeBeverage> findByName(String name);
+    List<CafeBeverage> findAllByName(String name);
 
     //    <S extends CafeBeverage> void saveAll(Iterable<S> entities);
 

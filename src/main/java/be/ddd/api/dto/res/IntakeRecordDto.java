@@ -6,10 +6,11 @@ import be.ddd.domain.entity.crawling.CafeBrand;
 import be.ddd.domain.entity.crawling.SugarLevel;
 import com.querydsl.core.annotations.QueryProjection;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public record IntakeRecordDto(
         Long intakeHistoryId,
-        Long beverageId,
+        UUID productId,
         String beverageName,
         CafeBrand cafeBrand,
         LocalDateTime intakeTime,
