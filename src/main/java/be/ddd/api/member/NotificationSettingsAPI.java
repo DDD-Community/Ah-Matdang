@@ -26,7 +26,7 @@ public class NotificationSettingsAPI {
         return ApiResponse.success(response);
     }
 
-    @PutMapping
+    @PatchMapping
     public ApiResponse<NotificationSettingsResponseDto> updateNotificationSettings(
             @PathVariable("fakeId") UUID fakeId,
             @Valid @RequestBody NotificationSettingsUpdateRequestDto request) {
