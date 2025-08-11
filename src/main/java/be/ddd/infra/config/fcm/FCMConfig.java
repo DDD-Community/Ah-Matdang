@@ -4,13 +4,13 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.Base64;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 
 @Slf4j
 @Configuration
@@ -18,30 +18,30 @@ import org.springframework.core.io.ResourceLoader;
 public class FCMConfig {
 
     @Bean
-    public FirebaseApp firebaseApp(FcmProperties props, ResourceLoader resourceLoader)
-            throws IOException {
-        Resource resource = resourceLoader.getResource(props.getServiceAccountPath());
+    public FirebaseApp firebaseApp(FcmProperties props) throws Exception {
+        String b64 = props.getServiceAccountJsonB64().trim();
 
-        if (!resource.exists()) {
-            throw new IllegalStateException(
-                    "FCM service account file not found: " + props.getServiceAccountPath());
+        byte[] decoded;
+        try {
+            decoded = Base64.getDecoder().decode(b64);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalStateException("Invalid Base64 for FCM service account JSON", e);
         }
 
-        try (var is = resource.getInputStream()) {
+        try (InputStream is = new ByteArrayInputStream(decoded)) {
             FirebaseOptions options =
                     FirebaseOptions.builder()
                             .setCredentials(GoogleCredentials.fromStream(is))
                             .build();
 
-            // 이미 초기화되어 있다면 재사용 (테스트/재기동 대비)
-            return FirebaseApp.getApps().stream()
-                    .findFirst()
-                    .orElse(FirebaseApp.initializeApp(options));
+            return FirebaseApp.getApps().isEmpty()
+                    ? FirebaseApp.initializeApp(options)
+                    : FirebaseApp.getInstance();
         }
     }
 
     @Bean
-    public FirebaseMessaging firebaseMessaging(FirebaseApp firebaseApp) {
-        return FirebaseMessaging.getInstance(firebaseApp);
+    public FirebaseMessaging firebaseMessaging(FirebaseApp app) {
+        return FirebaseMessaging.getInstance(app);
     }
 }
