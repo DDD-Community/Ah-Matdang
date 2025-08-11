@@ -53,8 +53,15 @@ public class MemberHealthMetric {
         this.sugarIntakeLevel = sugarIntakeLevel;
     }
 
-    public void calculatePersonalSugar(Double sugarMaxG, Double sugarIdealG) {
-        this.sugarMaxG = sugarMaxG;
-        this.sugarIdealG = sugarIdealG;
+    public void calculatePersonalSugar(Double baseSugarMaxG, Double baseSugarIdealG) {
+        if (this.sugarIntakeLevel == null) {
+            this.sugarMaxG = baseSugarMaxG;
+            this.sugarIdealG = baseSugarIdealG;
+            return;
+        }
+
+        double multiplier = this.sugarIntakeLevel.getMultiplier();
+        this.sugarMaxG = baseSugarMaxG * multiplier;
+        this.sugarIdealG = baseSugarIdealG * multiplier;
     }
 }

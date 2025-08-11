@@ -3,6 +3,7 @@ package be.ddd.application.member;
 import be.ddd.api.dto.req.MemberProfileModifyDto;
 import be.ddd.api.dto.req.MemberProfileRegistrationDto;
 import be.ddd.api.dto.res.MemberModifyDetailsDto;
+import be.ddd.api.dto.res.MemberRegistrationDetailsDto;
 import be.ddd.application.member.dto.res.RecommendedSugar;
 import be.ddd.common.mapper.MemberProfileMapper;
 import be.ddd.domain.entity.member.Member;
@@ -29,7 +30,8 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     private final SugarRecommendationService sugarRecommendationService;
 
     @Override
-    public UUID registerMemberProfile(UUID fakeId, MemberProfileRegistrationDto req) {
+    public MemberRegistrationDetailsDto registerMemberProfile(
+            UUID fakeId, MemberProfileRegistrationDto req) {
         Member member =
                 memberRepository.findByFakeId(fakeId).orElseThrow(MemberNotFoundException::new);
 
@@ -45,10 +47,9 @@ public class MemberCommandServiceImpl implements MemberCommandService {
 
         member.ofProfile(req.nickname(), birthDay, healthMetric);
 
-        // 당류 권장량 계산 및 저장 로직 추가
-        updateSugarRecommendation(member);
+        RecommendedSugar recommendedSugar = updateSugarRecommendation(member);
 
-        return member.getFakeId();
+        return new MemberRegistrationDetailsDto(member.getFakeId(), recommendedSugar);
     }
 
     @Override
@@ -58,17 +59,18 @@ public class MemberCommandServiceImpl implements MemberCommandService {
 
         memberProfileMapper.modifyFromDto(req, member);
 
-        // 당류 권장량 계산 및 저장 로직 추가
-        updateSugarRecommendation(member);
+        RecommendedSugar recommendedSugar = updateSugarRecommendation(member);
 
-        return MemberModifyDetailsDto.from(member);
+        return MemberModifyDetailsDto.from(member, recommendedSugar);
     }
 
-    private void updateSugarRecommendation(Member member) {
+    private RecommendedSugar updateSugarRecommendation(Member member) {
         RecommendedSugar recommendedSugar = sugarRecommendationService.calculate(member);
         MemberHealthMetric healthMetric = member.getMemberHealthMetric();
         healthMetric.calculatePersonalSugar(
                 recommendedSugar.sugarMaxG(), recommendedSugar.sugarIdealG());
+
+        return recommendedSugar;
     }
 
     private Integer calculateAge(LocalDate birthday) {
