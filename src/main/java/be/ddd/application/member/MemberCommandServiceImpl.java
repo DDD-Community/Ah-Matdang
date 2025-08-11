@@ -8,6 +8,7 @@ import be.ddd.application.member.dto.res.RecommendedSugar;
 import be.ddd.common.mapper.MemberProfileMapper;
 import be.ddd.domain.entity.member.Member;
 import be.ddd.domain.entity.member.MemberHealthMetric;
+import be.ddd.domain.entity.member.NotificationSettings;
 import be.ddd.domain.exception.InvalidInputException;
 import be.ddd.domain.exception.MemberNotFoundException;
 import be.ddd.domain.repo.MemberRepository;
@@ -46,6 +47,9 @@ public class MemberCommandServiceImpl implements MemberCommandService {
                         req.sugarIntakeLevel());
 
         member.ofProfile(req.nickname(), birthDay, healthMetric);
+
+        NotificationSettings notificationSettings = new NotificationSettings(member);
+        member.notificationSettings(notificationSettings);
 
         RecommendedSugar recommendedSugar = updateSugarRecommendation(member);
 
