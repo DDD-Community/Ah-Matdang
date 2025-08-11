@@ -30,7 +30,6 @@ public class NotificationSettingsCommandServiceImpl implements NotificationSetti
                 memberRepository
                         .findByFakeId(memberFakeId)
                         .orElseThrow(MemberNotFoundException::new);
-        System.out.println("안나오면좋버그2 = " + "안나오면좋버그2");
         NotificationSettings settings = member.getNotificationSettings();
         log.info("setting: {}", dto.isEnabled());
         if (Objects.isNull(settings)) {
