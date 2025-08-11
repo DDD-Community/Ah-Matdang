@@ -11,14 +11,25 @@ public record NotificationSettingsResponseDto(
         boolean newsUpdatesEnabled) {
     public static NotificationSettingsResponseDto from(NotificationSettings settings) {
         if (settings == null) {
-            // 설정이 없는 경우 기본값으로 응답
             return new NotificationSettingsResponseDto(true, true, LocalTime.of(21, 0), true, true);
         }
+
+        boolean actualIsEnabled = settings.isEnabled();
+        boolean actualRemindersEnabled = settings.isRemindersEnabled();
+        boolean actualRiskWarningsEnabled = settings.isRiskWarningsEnabled();
+        boolean actualNewsUpdatesEnabled = settings.isNewsUpdatesEnabled();
+
+        if (!actualIsEnabled) {
+            actualRemindersEnabled = false;
+            actualRiskWarningsEnabled = false;
+            actualNewsUpdatesEnabled = false;
+        }
+
         return new NotificationSettingsResponseDto(
-                settings.isEnabled(),
-                settings.isRemindersEnabled(),
+                actualIsEnabled,
+                actualRemindersEnabled,
                 settings.getReminderTime(),
-                settings.isRiskWarningsEnabled(),
-                settings.isNewsUpdatesEnabled());
+                actualRiskWarningsEnabled,
+                actualNewsUpdatesEnabled);
     }
 }
