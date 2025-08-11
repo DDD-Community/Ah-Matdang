@@ -10,12 +10,14 @@ import be.ddd.domain.repo.MemberRepository;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Log4j2
 public class NotificationSettingsCommandServiceImpl implements NotificationSettingsCommandService {
 
     private final MemberRepository memberRepository;
@@ -28,14 +30,20 @@ public class NotificationSettingsCommandServiceImpl implements NotificationSetti
                 memberRepository
                         .findByFakeId(memberFakeId)
                         .orElseThrow(MemberNotFoundException::new);
-
+        System.out.println("안나오면좋버그2 = " + "안나오면좋버그2");
         NotificationSettings settings = member.getNotificationSettings();
+        log.info("setting: {}", dto.isEnabled());
         if (Objects.isNull(settings)) {
             settings = new NotificationSettings(member);
             member.notificationSettings(settings);
         }
-
-        notificationSettingsMapper.updateFromDto(dto, settings);
+        settings.updateSettings(
+                dto.isEnabled(),
+                dto.remindersEnabled(),
+                dto.reminderTime(),
+                dto.riskWarningsEnabled(),
+                dto.newsUpdatesEnabled());
+        //        notificationSettingsMapper.updateSettings(dto, settings);
 
         return NotificationSettingsResponseDto.from(settings);
     }
