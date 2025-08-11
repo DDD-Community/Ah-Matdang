@@ -43,4 +43,8 @@ public class NotificationSettings extends BaseTimeEntity {
     @Column(name = "news_updates_enabled", nullable = false)
     @ColumnDefault("true")
     private boolean newsUpdatesEnabled = true;
+
+    public NotificationSettings(Member member) {
+        this.member = member;
+    }
 }
