@@ -65,12 +65,13 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     }
 
     private RecommendedSugar updateSugarRecommendation(Member member) {
-        RecommendedSugar recommendedSugar = sugarRecommendationService.calculate(member);
+        RecommendedSugar baseRecommendation = sugarRecommendationService.calculate(member);
         MemberHealthMetric healthMetric = member.getMemberHealthMetric();
-        healthMetric.calculatePersonalSugar(
-                recommendedSugar.sugarMaxG(), recommendedSugar.sugarIdealG());
 
-        return recommendedSugar;
+        healthMetric.calculatePersonalSugar(
+                baseRecommendation.sugarMaxG(), baseRecommendation.sugarIdealG());
+
+        return new RecommendedSugar(healthMetric.getSugarMaxG(), healthMetric.getSugarIdealG());
     }
 
     private Integer calculateAge(LocalDate birthday) {
