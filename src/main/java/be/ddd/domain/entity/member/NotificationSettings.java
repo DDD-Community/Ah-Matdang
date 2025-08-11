@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.hibernate.annotations.ColumnDefault;
 
 @Getter
@@ -14,6 +15,7 @@ import org.hibernate.annotations.ColumnDefault;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "notification_settings")
+@Log4j2
 public class NotificationSettings extends BaseTimeEntity {
 
     @Id
@@ -46,5 +48,35 @@ public class NotificationSettings extends BaseTimeEntity {
 
     public NotificationSettings(Member member) {
         this.member = member;
+    }
+
+    public void updateSettings(
+            Boolean isEnabled,
+            Boolean remindersEnabled,
+            LocalTime reminderTime,
+            Boolean riskWarningsEnabled,
+            Boolean newsUpdatesEnabled) {
+        log.info("진짜중요! isEnabled:{}", isEnabled);
+        if (isEnabled != null) {
+            this.isEnabled = isEnabled;
+            if (!this.isEnabled) {
+                log.info("도ㅒㅆ냐??????");
+                this.remindersEnabled = false;
+                this.riskWarningsEnabled = false;
+                this.newsUpdatesEnabled = false;
+            }
+        }
+        if (remindersEnabled != null) {
+            this.remindersEnabled = remindersEnabled;
+        }
+        if (reminderTime != null) {
+            this.reminderTime = reminderTime;
+        }
+        if (riskWarningsEnabled != null) {
+            this.riskWarningsEnabled = riskWarningsEnabled;
+        }
+        if (newsUpdatesEnabled != null) {
+            this.newsUpdatesEnabled = newsUpdatesEnabled;
+        }
     }
 }

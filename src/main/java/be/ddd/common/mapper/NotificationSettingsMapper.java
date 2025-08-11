@@ -12,6 +12,6 @@ import org.mapstruct.ReportingPolicy;
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface NotificationSettingsMapper {
-    void updateFromDto(
+    void updateSettings(
             NotificationSettingsUpdateRequestDto dto, @MappingTarget NotificationSettings entity);
 }
