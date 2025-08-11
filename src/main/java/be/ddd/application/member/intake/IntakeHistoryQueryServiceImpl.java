@@ -40,8 +40,8 @@ public class IntakeHistoryQueryServiceImpl implements IntakeHistoryQueryService 
     public List<DailyIntakeDto> getWeeklyIntakeHistory(Long memberId, LocalDateTime dateInWeek) {
         validateFutureDate(dateInWeek);
         LocalDateTime startOfWeek =
-                dateInWeek.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-        LocalDateTime endOfWeek = dateInWeek.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+                dateInWeek.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
+        LocalDateTime endOfWeek = startOfWeek.plusDays(6);
 
         List<IntakeRecordDto> records =
                 intakeHistoryRepository.findByMemberIdAndDateBetween(

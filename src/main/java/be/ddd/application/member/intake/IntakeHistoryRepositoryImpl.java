@@ -9,6 +9,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -30,7 +31,7 @@ public class IntakeHistoryRepositoryImpl implements IntakeHistoryRepositoryCusto
                 .select(
                         new QIntakeRecordDto(
                                 intakeHistory.id,
-                                intakeHistory.cafeBeverage.id,
+                                intakeHistory.cafeBeverage.productId,
                                 intakeHistory.cafeBeverage.name,
                                 intakeHistory.cafeBeverage.cafeStore.cafeBrand,
                                 intakeHistory.intakeTime,
@@ -57,7 +58,7 @@ public class IntakeHistoryRepositoryImpl implements IntakeHistoryRepositoryCusto
                 .select(
                         new QIntakeRecordDto(
                                 intakeHistory.id,
-                                intakeHistory.cafeBeverage.id,
+                                intakeHistory.cafeBeverage.productId,
                                 intakeHistory.cafeBeverage.name,
                                 intakeHistory.cafeBeverage.cafeStore.cafeBrand,
                                 intakeHistory.intakeTime,
@@ -83,5 +84,25 @@ public class IntakeHistoryRepositoryImpl implements IntakeHistoryRepositoryCusto
                         intakeHistory.cafeBeverage.productId.eq(productId),
                         intakeHistory.intakeTime.eq(intakeTime))
                 .execute();
+    }
+
+    @Override
+    public Map<Long, Double> sumSugarByMemberIdsAndDate(List<Long> memberIds, LocalDateTime date) {
+        LocalDateTime startOfDay = date.toLocalDate().atStartOfDay();
+        LocalDateTime endOfDay = date.toLocalDate().atTime(LocalTime.MAX);
+
+        return queryFactory
+                .select(
+                        intakeHistory.member.id,
+                        beverageSizeInfo.beverageNutrition.sugarG.doubleValue().sum())
+                .from(intakeHistory)
+                .leftJoin(intakeHistory.cafeBeverage.sizes, beverageSizeInfo)
+                .where(
+                        intakeHistory.member.id.in(memberIds),
+                        intakeHistory.intakeTime.between(startOfDay, endOfDay))
+                .groupBy(intakeHistory.member.id)
+                .transform(
+                        com.querydsl.core.group.GroupBy.groupBy(intakeHistory.member.id)
+                                .as(beverageSizeInfo.beverageNutrition.sugarG.doubleValue().sum()));
     }
 }

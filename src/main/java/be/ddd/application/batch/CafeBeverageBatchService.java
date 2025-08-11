@@ -8,38 +8,51 @@ import be.ddd.domain.repo.CafeBeverageRepository;
 import be.ddd.domain.repo.CafeStoreRepository;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
+@Slf4j
 public class CafeBeverageBatchService {
 
     private final CafeBeverageRepository repository;
     private final WebClient.Builder webClientBuilder;
 
     private final String lambdaUrl =
-            "https://dla6sbxferlsb2jl6wtmjvmioe0hdmdc.lambda-url.ap-northeast-2.on.aws/";
+            "https://u6wvrcscqwe7rdbblr3xebajf40avfxz.lambda-url.ap-northeast-2.on.aws/";
     private final CafeStoreRepository cafeStoreRepository;
 
     public List<LambdaBeverageDto> fetchAll() {
-        return webClientBuilder
-                .baseUrl(lambdaUrl)
-                .build()
-                .get()
-                .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<List<LambdaBeverageDto>>() {})
-                .block();
+        List<LambdaBeverageDto> beverages =
+                webClientBuilder
+                        .baseUrl(lambdaUrl)
+                        .build()
+                        .get()
+                        .retrieve()
+                        .bodyToMono(new ParameterizedTypeReference<List<LambdaBeverageDto>>() {})
+                        .block();
+        log.info(
+                "[DEBUG] Fetched {} beverages from Lambda.",
+                beverages != null ? beverages.size() : 0);
+        return beverages;
     }
 
     public CafeBeverage toEntity(LambdaBeverageDto dto) {
+        log.info(
+                "[DEBUG] Processing DTO for beverage: '{}'. Sizes received: {}",
+                dto.name(),
+                dto.beverageNutritions().keySet());
         Objects.requireNonNull(dto.name(), "Beverage name required");
-        Optional<CafeBeverage> opt = repository.findByName(dto.name());
-        if (opt.isPresent()) {
-            CafeBeverage existing = opt.get();
+        List<CafeBeverage> existingBeverages = repository.findAllByName(dto.name());
+        if (!existingBeverages.isEmpty()) {
+            // 중복된 음료가 있다면, 첫 번째 음료를 기준으로 업데이트
+            CafeBeverage existing = existingBeverages.get(0);
             existing.updateFromDto(dto);
             return existing;
         } else {

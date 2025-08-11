@@ -34,15 +34,28 @@ public class Member extends BaseTimeEntity {
 
     private String profileUrl;
 
+    private String deviceToken; // FCM 디바이스 토큰
+
     @Column(name = "birth_day")
     private LocalDate birthDay;
 
     private MemberHealthMetric memberHealthMetric;
+
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private NotificationSettings notificationSettings;
 
     public void ofProfile(
             String nickname, LocalDate birthDay, MemberHealthMetric memberHealthMetric) {
         this.nickname = nickname;
         this.birthDay = birthDay;
         this.memberHealthMetric = memberHealthMetric;
+    }
+
+    public void updateDeviceToken(String deviceToken) {
+        this.deviceToken = deviceToken;
+    }
+
+    public void notificationSettings(NotificationSettings notificationSettings) {
+        this.notificationSettings = notificationSettings;
     }
 }

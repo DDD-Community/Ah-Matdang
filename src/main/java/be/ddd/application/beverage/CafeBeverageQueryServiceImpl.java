@@ -56,9 +56,10 @@ public class CafeBeverageQueryServiceImpl implements CafeBeverageQueryService {
 
         List<CafeBeveragePageDto> pageResults = fetched.stream().limit(size).toList();
 
-        long likedCount = pageResults.stream().filter(CafeBeveragePageDto::isLiked).count();
+        long totalLikedCount =
+                beverageRepository.countAllLikedByMemberAndFilters(brand, sugar, memberId);
 
-        return new CafeBeverageCursorPageDto<>(pageResults, nextCursor, hasNext, likedCount);
+        return new CafeBeverageCursorPageDto<>(pageResults, nextCursor, hasNext, totalLikedCount);
     }
 
     @Override
