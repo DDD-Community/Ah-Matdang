@@ -178,4 +178,21 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
                 "case when {0} is not null then true else false end",
                 memberBeverageLike.beverage.id);
     }
+
+    @Override
+    public long countAllLikedByMemberAndFilters(
+            CafeBrand brand, SugarLevel sugarLevel, Long memberId) {
+        Long count =
+                queryFactory
+                        .select(beverage.count())
+                        .from(beverage)
+                        .innerJoin(memberBeverageLike)
+                        .on(beverage.id.eq(memberBeverageLike.beverage.id))
+                        .where(
+                                memberBeverageLike.member.id.eq(memberId),
+                                brandEq(brand),
+                                sugarLevelEq(sugarLevel))
+                        .fetchOne();
+        return count != null ? count : 0L;
+    }
 }
