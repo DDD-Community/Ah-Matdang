@@ -30,7 +30,6 @@ public class NotificationSettingsAPI {
     public ApiResponse<NotificationSettingsResponseDto> updateNotificationSettings(
             @PathVariable("fakeId") UUID fakeId,
             @Valid @RequestBody NotificationSettingsUpdateRequestDto request) {
-        System.out.println("\"안나오면 좋버그\" = " + "안나오면 좋버그");
         NotificationSettingsResponseDto response =
                 notificationSettingsCommandService.updateNotificationSettings(fakeId, request);
         return ApiResponse.success(response);
