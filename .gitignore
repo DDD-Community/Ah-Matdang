@@ -44,3 +44,4 @@ application-dev.yml
 terraform/terraform.tfvars
 /src/test/java/be/ddd/JasyptConfigTest.java
 /src/main/resources/fcm/
+.env
