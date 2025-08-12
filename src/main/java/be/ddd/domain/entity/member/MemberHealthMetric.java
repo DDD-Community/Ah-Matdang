@@ -33,10 +33,10 @@ public class MemberHealthMetric {
     private SugarIntakeLevel sugarIntakeLevel;
 
     @Column(name = "sugar_max_g")
-    private Double sugarMaxG = 0.0;
+    private Integer sugarMaxG = 0;
 
     @Column(name = "sugar_ideal_g")
-    private Double sugarIdealG = 0.0;
+    private Integer sugarIdealG = 0;
 
     public MemberHealthMetric(
             Integer age,
@@ -53,7 +53,7 @@ public class MemberHealthMetric {
         this.sugarIntakeLevel = sugarIntakeLevel;
     }
 
-    public void calculatePersonalSugar(Double baseSugarMaxG, Double baseSugarIdealG) {
+    public void calculatePersonalSugar(Integer baseSugarMaxG, Integer baseSugarIdealG) {
         if (this.sugarIntakeLevel == null) {
             this.sugarMaxG = baseSugarMaxG;
             this.sugarIdealG = baseSugarIdealG;
@@ -61,7 +61,14 @@ public class MemberHealthMetric {
         }
 
         double multiplier = this.sugarIntakeLevel.getMultiplier();
-        this.sugarMaxG = baseSugarMaxG * multiplier;
-        this.sugarIdealG = baseSugarIdealG * multiplier;
+        this.sugarMaxG = roundToInteger(baseSugarMaxG * multiplier);
+        this.sugarIdealG = roundToInteger(baseSugarIdealG * multiplier);
+    }
+
+    private Integer roundToInteger(Double value) {
+        if (value == null) {
+            return 0;
+        }
+        return (int) Math.round(value);
     }
 }
