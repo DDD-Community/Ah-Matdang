@@ -2,8 +2,11 @@ package be.ddd.application.member.intake;
 
 import be.ddd.api.dto.res.DailyIntakeDto;
 import be.ddd.api.dto.res.IntakeRecordDto;
+import be.ddd.application.member.dto.res.RecommendedSugar;
 import be.ddd.common.util.CustomClock;
+import be.ddd.domain.entity.member.Member;
 import be.ddd.domain.exception.FutureDateNotAllowedException;
+import be.ddd.domain.exception.MemberNotFoundException;
 import be.ddd.domain.repo.CafeBeverageRepository;
 import be.ddd.domain.repo.IntakeHistoryRepository;
 import be.ddd.domain.repo.MemberRepository;
@@ -31,14 +34,26 @@ public class IntakeHistoryQueryServiceImpl implements IntakeHistoryQueryService 
     @Override
     public DailyIntakeDto getDailyIntakeHistory(Long memberId, LocalDateTime date) {
         validateFutureDate(date);
+        Member member =
+                memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        RecommendedSugar recommendedSugar =
+                new RecommendedSugar(
+                        member.getMemberHealthMetric().getSugarMaxG(),
+                        member.getMemberHealthMetric().getSugarIdealG());
         List<IntakeRecordDto> records =
                 intakeHistoryRepository.findByMemberIdAndDate(memberId, date);
-        return new DailyIntakeDto(date, records);
+        return new DailyIntakeDto(date, records, recommendedSugar);
     }
 
     @Override
     public List<DailyIntakeDto> getWeeklyIntakeHistory(Long memberId, LocalDateTime dateInWeek) {
         validateFutureDate(dateInWeek);
+        Member member =
+                memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        RecommendedSugar recommendedSugar =
+                new RecommendedSugar(
+                        member.getMemberHealthMetric().getSugarMaxG(),
+                        member.getMemberHealthMetric().getSugarIdealG());
         LocalDateTime startOfWeek =
                 dateInWeek.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
         LocalDateTime endOfWeek = startOfWeek.plusDays(6);
@@ -59,7 +74,10 @@ public class IntakeHistoryQueryServiceImpl implements IntakeHistoryQueryService 
                 !date.isAfter(endOfWeek.toLocalDate().atStartOfDay());
                 date = date.plusDays(1)) {
             dailyIntakeList.add(
-                    new DailyIntakeDto(date, recordsByDate.getOrDefault(date, new ArrayList<>())));
+                    new DailyIntakeDto(
+                            date,
+                            recordsByDate.getOrDefault(date, new ArrayList<>()),
+                            recommendedSugar));
         }
         return dailyIntakeList;
     }
@@ -67,11 +85,15 @@ public class IntakeHistoryQueryServiceImpl implements IntakeHistoryQueryService 
     @Override
     public List<DailyIntakeDto> getMonthlyIntakeHistory(Long memberId, LocalDateTime dateInMonth) {
         validateFutureDate(dateInMonth);
+        Member member =
+                memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        RecommendedSugar recommendedSugar =
+                new RecommendedSugar(
+                        member.getMemberHealthMetric().getSugarMaxG(),
+                        member.getMemberHealthMetric().getSugarIdealG());
         LocalDateTime firstDayOfMonth = dateInMonth.with(TemporalAdjusters.firstDayOfMonth());
         LocalDateTime lastDayOfMonth = dateInMonth.with(TemporalAdjusters.lastDayOfMonth());
 
-        // Calculate start and end dates for the calendar view (considering previous/next month's
-        // days)
         LocalDateTime calendarStartDate =
                 firstDayOfMonth.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         LocalDateTime calendarEndDate =
@@ -93,7 +115,10 @@ public class IntakeHistoryQueryServiceImpl implements IntakeHistoryQueryService 
                 !date.isAfter(calendarEndDate.toLocalDate().atStartOfDay());
                 date = date.plusDays(1)) {
             dailyIntakeList.add(
-                    new DailyIntakeDto(date, recordsByDate.getOrDefault(date, new ArrayList<>())));
+                    new DailyIntakeDto(
+                            date,
+                            recordsByDate.getOrDefault(date, new ArrayList<>()),
+                            recommendedSugar));
         }
         return dailyIntakeList;
     }

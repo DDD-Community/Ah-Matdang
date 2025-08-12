@@ -17,7 +17,7 @@ public class SugarRecommendationService {
                 || metric.getWeightKg() == null
                 || metric.getGender() == null
                 || metric.getActivityRange() == null) {
-            return new RecommendedSugar(0.0, 0.0);
+            return new RecommendedSugar(0, 0);
         }
 
         double bmr = calculateBMR(metric.getAge(), metric.getWeightKg(), metric.getGender());
@@ -26,8 +26,11 @@ public class SugarRecommendationService {
         double dailySugarKcal = tee * 0.10;
         double dailySugarKcalIdeal = tee * 0.05;
 
-        double sugarMaxG = dailySugarKcal / 4.0;
-        double sugarIdealG = dailySugarKcalIdeal / 4.0;
+        double sugarMaxGDouble = dailySugarKcal / 4.0;
+        double sugarIdealGDouble = dailySugarKcalIdeal / 4.0;
+
+        int sugarMaxG = (int) Math.round(sugarMaxGDouble);
+        int sugarIdealG = (int) Math.round(sugarIdealGDouble);
 
         return new RecommendedSugar(sugarMaxG, sugarIdealG);
     }

@@ -75,7 +75,10 @@ public class MemberCommandServiceImpl implements MemberCommandService {
         healthMetric.calculatePersonalSugar(
                 baseRecommendation.sugarMaxG(), baseRecommendation.sugarIdealG());
 
-        return new RecommendedSugar(healthMetric.getSugarMaxG(), healthMetric.getSugarIdealG());
+        // 3. DB에 저장된 최종 개인화 값을 DTO에 담아 반환
+        return RecommendedSugar.fromIntegerValues(
+                healthMetric.getSugarMaxG().doubleValue(),
+                healthMetric.getSugarIdealG().doubleValue());
     }
 
     private Integer calculateAge(LocalDate birthday) {
