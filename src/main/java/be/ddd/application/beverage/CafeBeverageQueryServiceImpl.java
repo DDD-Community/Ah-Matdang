@@ -39,13 +39,15 @@ public class CafeBeverageQueryServiceImpl implements CafeBeverageQueryService {
             int size,
             Optional<CafeBrand> brandFilter,
             Optional<SugarLevel> sugarLevel,
-            Long memberId) {
+            Long memberId,
+            Boolean onlyLiked) {
 
         CafeBrand brand = brandFilter.orElse(null);
         SugarLevel sugar = sugarLevel.orElse(null);
 
         List<CafeBeveragePageDto> fetched =
-                beverageRepository.findWithCursor(cursor, size + 1, brand, sugar, memberId);
+                beverageRepository.findWithCursor(
+                        cursor, size + 1, brand, sugar, memberId, onlyLiked);
 
         boolean hasNext = fetched.size() > size;
 
@@ -54,10 +56,10 @@ public class CafeBeverageQueryServiceImpl implements CafeBeverageQueryService {
             nextCursor = encodingUtil.encodeSignedCursor(fetched.get(size - 1).id());
         }
 
-        List<CafeBeveragePageDto> pageResults = fetched.stream().limit(size).toList();
-
         long totalLikedCount =
                 beverageRepository.countAllLikedByMemberAndFilters(brand, sugar, memberId);
+
+        List<CafeBeveragePageDto> pageResults = fetched.stream().limit(size).toList();
 
         return new CafeBeverageCursorPageDto<>(pageResults, nextCursor, hasNext, totalLikedCount);
     }

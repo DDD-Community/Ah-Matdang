@@ -34,7 +34,12 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
 
     @Override
     public List<CafeBeveragePageDto> findWithCursor(
-            Long cursor, int limit, CafeBrand brand, SugarLevel sugarLevel, Long memberId) {
+            Long cursor,
+            int limit,
+            CafeBrand brand,
+            SugarLevel sugarLevel,
+            Long memberId,
+            Boolean onlyLiked) {
 
         return queryFactory
                 .select(
@@ -56,10 +61,21 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
                         beverage.id
                                 .eq(memberBeverageLike.beverage.id)
                                 .and(memberBeverageLike.member.id.eq(memberId)))
-                .where(beverage.id.gt(cursor), brandEq(brand), sugarLevelEq(sugarLevel))
+                .where(
+                        beverage.id.gt(cursor),
+                        brandEq(brand),
+                        sugarLevelEq(sugarLevel),
+                        onlyLikedEq(onlyLiked))
                 .orderBy(beverage.id.asc())
                 .limit(limit)
                 .fetch();
+    }
+
+    private BooleanExpression onlyLikedEq(Boolean onlyLiked) {
+        if (onlyLiked == null || !onlyLiked) {
+            return null;
+        }
+        return memberBeverageLike.isNotNull();
     }
 
     /*@Override

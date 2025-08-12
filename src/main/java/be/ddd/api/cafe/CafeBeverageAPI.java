@@ -33,7 +33,8 @@ public class CafeBeverageAPI {
             @RequestParam(required = false) String cursor,
             @RequestParam(defaultValue = "15") @Positive int size,
             @RequestParam(required = false) String cafeBrand,
-            @RequestParam(required = false) String sugarLevel) {
+            @RequestParam(required = false) String sugarLevel,
+            @RequestParam(required = false) Boolean onlyLiked) {
         Long decodedCursor =
                 Optional.ofNullable(cursor).map(encodingUtil::decodeSignedCursor).orElse(0L);
 
@@ -44,7 +45,7 @@ public class CafeBeverageAPI {
 
         CafeBeverageCursorPageDto<CafeBeveragePageDto> results =
                 cafeBeverageQueryService.getCafeBeverageCursorPage(
-                        decodedCursor, size, brand, sugar, MEMBER_ID);
+                        decodedCursor, size, brand, sugar, MEMBER_ID, onlyLiked);
         return ApiResponse.success(results);
     }
 
