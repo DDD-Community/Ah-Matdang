@@ -23,14 +23,20 @@ public class SecurityConfig {
         return new Auth0JwtFilter(auth0JwtVerifier);
     }
 
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+            .httpBasic(b -> b.disable())
+            .formLogin(f -> f.disable())
+
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/health", "/public/**").permitAll()
+                .requestMatchers("/auth/**", "/demo/public").permitAll()
                 .anyRequest().authenticated()
             )
+
             .addFilterBefore(auth0JwtFilter(), UsernamePasswordAuthenticationFilter.class);
 
             return http.build();

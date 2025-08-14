@@ -61,6 +61,6 @@ app:
   hmac:
     secret: ENC(jP8A2gyCQbR1P9wV6dG1lhRH3irrwURocEHzTek/ocM=)
     algorithm: ENC(4fvHOfRsZwC5lPG2fgBPs/RqF0Z1OXUQ)
-
+---
 fcm:
   service-account-json-b64: ${FIREBASE_SA_JSON_B64}
