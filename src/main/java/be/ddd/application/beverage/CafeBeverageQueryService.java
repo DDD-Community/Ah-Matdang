@@ -23,5 +23,6 @@ public interface CafeBeverageQueryService {
 
     BeverageCountDto getBeverageCountByBrandAndSugarLevel(Optional<CafeBrand> brandFilter);
 
-    BeverageSearchResultDto searchBeverages(String keyword, Long memberId);
+    BeverageSearchResultDto searchBeverages(
+            String keyword, Long memberId, Optional<SugarLevel> sugarLevel, Boolean onlyLiked);
 }
