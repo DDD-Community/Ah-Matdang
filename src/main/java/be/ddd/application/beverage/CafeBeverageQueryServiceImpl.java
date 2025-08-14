@@ -110,10 +110,21 @@ public class CafeBeverageQueryServiceImpl implements CafeBeverageQueryService {
     }
 
     @Override
-    public BeverageSearchResultDto searchBeverages(String keyword, Long memberId) {
+    public BeverageSearchResultDto searchBeverages(
+            String keyword, Long memberId, Optional<SugarLevel> sugarLevel, Boolean onlyLiked) {
         List<BeverageSearchDto> beverageSearchResults =
-                beverageRepository.searchByName(keyword, memberId);
+                beverageRepository.searchByName(keyword, memberId, sugarLevel, onlyLiked);
         long likeCount = beverageSearchResults.stream().filter(BeverageSearchDto::isLiked).count();
-        return new BeverageSearchResultDto(beverageSearchResults, likeCount);
+
+        BeverageCountDto counts =
+                beverageRepository.countSugarLevelBySearchFilters(
+                        keyword, memberId, sugarLevel, onlyLiked);
+
+        return new BeverageSearchResultDto(
+                beverageSearchResults,
+                likeCount,
+                counts.totalCount(),
+                counts.zeroCount(),
+                counts.lowCount());
     }
 }

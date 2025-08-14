@@ -4,4 +4,8 @@ import be.ddd.application.beverage.dto.BeverageSearchDto;
 import java.util.List;
 
 public record BeverageSearchResultDto(
-        List<BeverageSearchDto> beverageSearchResults, long likeCount) {}
+        List<BeverageSearchDto> beverageSearchResults,
+        long likeCount,
+        long totalCount,
+        long zeroSugarCount,
+        long lowSugarCount) {}

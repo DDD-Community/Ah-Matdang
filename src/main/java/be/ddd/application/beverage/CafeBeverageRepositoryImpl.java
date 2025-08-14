@@ -1,6 +1,7 @@
 package be.ddd.application.beverage;
 
-import static com.querydsl.core.types.dsl.Expressions.*;
+import static com.querydsl.core.types.dsl.Expressions.constant;
+import static com.querydsl.core.types.dsl.Expressions.numberTemplate;
 
 import be.ddd.api.dto.res.BeverageCountDto;
 import be.ddd.application.beverage.dto.BeverageSearchDto;
@@ -20,6 +21,7 @@ import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.annotation.Nullable;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -28,6 +30,7 @@ import org.springframework.stereotype.Repository;
 public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
+    private final BeverageQueryPredicates beverageQueryPredicates;
     private final QCafeBeverage beverage = QCafeBeverage.cafeBeverage;
     private final QBeverageSizeInfo beverageSizeInfo = QBeverageSizeInfo.beverageSizeInfo;
     private final QMemberBeverageLike memberBeverageLike = QMemberBeverageLike.memberBeverageLike;
@@ -63,95 +66,30 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
                                 .and(memberBeverageLike.member.id.eq(memberId)))
                 .where(
                         beverage.id.gt(cursor),
-                        brandEq(brand),
-                        sugarLevelEq(sugarLevel),
-                        onlyLikedEq(onlyLiked))
+                        beverageQueryPredicates.brandEq(brand),
+                        beverageQueryPredicates.sugarLevelEq(sugarLevel),
+                        beverageQueryPredicates.onlyLiked(onlyLiked))
                 .orderBy(beverage.id.asc())
                 .limit(limit)
                 .fetch();
     }
 
-    private BooleanExpression onlyLikedEq(Boolean onlyLiked) {
-        if (onlyLiked == null || !onlyLiked) {
-            return null;
-        }
-        return memberBeverageLike.isNotNull();
-    }
-
-    /*@Override
-    public long countAll(CafeBrand brand) {
-        Long cnt =
-            queryFactory
-                .select(beverage.count())
-                .from(beverage)
-                .where(brandEq(brand))
-                .fetchOne();
-        return cnt != null ? cnt : 0L;
-    }
-
-    @Override
-    public long countBySugar(CafeBrand brand, SugarLevel sugarLevel) {
-        Long cnt =
-            queryFactory
-                .select(beverage.count())
-                .from(beverage)
-                .where(brandEq(brand), sugarLevelEq(sugarLevel))
-                .fetchOne();
-        return cnt != null ? cnt : 0L;
-    }*/
-
     @Override
     public BeverageCountDto countSugarLevelByBrand(@Nullable CafeBrand brandFilter) {
-        BooleanExpression brandCond =
-                brandFilter != null ? beverage.cafeStore.cafeBrand.eq(brandFilter) : null;
-
-        return queryFactory
-                .select(
-                        Projections.constructor(
-                                BeverageCountDto.class,
-                                // 전체 개수
-                                beverage.count(),
-                                // 무당
-                                new CaseBuilder()
-                                        .when(beverage.sugarLevel.eq(SugarLevel.ZERO))
-                                        .then(1L)
-                                        .otherwise(0L)
-                                        .sum(),
-                                // 저당
-                                new CaseBuilder()
-                                        .when(beverage.sugarLevel.eq(SugarLevel.LOW))
-                                        .then(1L)
-                                        .otherwise(0L)
-                                        .sum()))
-                .from(beverage)
-                .where(brandCond)
-                .fetchOne();
-    }
-
-    private BooleanExpression brandEq(CafeBrand b) {
-        return b != null ? beverage.cafeStore.cafeBrand.eq(b) : null;
-    }
-
-    private BooleanExpression sugarLevelEq(SugarLevel sugarLevel) {
-        if (sugarLevel == null) {
-            return null;
-        }
-        if (sugarLevel == SugarLevel.ZERO) {
-            return beverage.sizes.any().beverageNutrition.sugarG.eq(0);
-        }
-        if (sugarLevel == SugarLevel.LOW) {
-            return beverage.sizes.any().beverageNutrition.sugarG.between(1, 20);
-        }
-        return null;
+        return countSugarLevelBy(beverageQueryPredicates.brandEq(brandFilter));
     }
 
     @Override
-    public List<BeverageSearchDto> searchByName(String keyword, Long memberId) {
+    public List<BeverageSearchDto> searchByName(
+            String keyword,
+            Long memberId,
+            Optional<SugarLevel> sugarLevelFilter,
+            Boolean onlyLiked) {
 
-        String booleanWildcard = "+" + keyword + "*";
-        NumberExpression<Double> relevance = calculateRelevance(booleanWildcard);
+        NumberExpression<Double> relevance = calculateRelevance(keyword);
         NumberExpression<Integer> likeOrder = calculateLikeOrder();
-        BooleanExpression isLiked = isLikedBeverage();
+
+        SugarLevel sugar = sugarLevelFilter.orElse(null);
 
         return queryFactory
                 .select(
@@ -164,7 +102,7 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
                                 Projections.constructor(
                                         CafeStoreDto.class, beverage.cafeStore.cafeBrand),
                                 beverageSizeInfo.beverageNutrition,
-                                isLiked))
+                                memberBeverageLike.isNotNull()))
                 .from(beverage)
                 .leftJoin(beverage.sizes, beverageSizeInfo)
                 .leftJoin(memberBeverageLike)
@@ -172,12 +110,16 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
                         beverage.id
                                 .eq(memberBeverageLike.beverage.id)
                                 .and(memberBeverageLike.member.id.eq(memberId)))
-                .where(relevance.gt(0))
+                .where(
+                        beverageQueryPredicates.keywordSearch(keyword),
+                        beverageQueryPredicates.sugarLevelEq(sugar),
+                        beverageQueryPredicates.onlyLiked(onlyLiked))
                 .orderBy(likeOrder.desc(), relevance.desc())
                 .fetch();
     }
 
-    private NumberExpression<Double> calculateRelevance(String booleanWildcard) {
+    private NumberExpression<Double> calculateRelevance(String keyword) {
+        String booleanWildcard = "+" + keyword.trim() + "*";
         return numberTemplate(
                 Double.class, "fulltext_match({0}, {1})", beverage.name, constant(booleanWildcard));
     }
@@ -189,10 +131,42 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
                 memberBeverageLike.beverage.id);
     }
 
-    private BooleanExpression isLikedBeverage() {
-        return booleanTemplate(
-                "case when {0} is not null then true else false end",
-                memberBeverageLike.beverage.id);
+    @Override
+    public BeverageCountDto countSugarLevelBySearchFilters(
+            String keyword, Long memberId, Optional<SugarLevel> sugarLevel, Boolean onlyLiked) {
+
+        SugarLevel sugar = sugarLevel.orElse(null);
+
+        var query =
+                queryFactory
+                        .select(
+                                Projections.constructor(
+                                        BeverageCountDto.class,
+                                        beverage.count(),
+                                        new CaseBuilder()
+                                                .when(beverage.sugarLevel.eq(SugarLevel.ZERO))
+                                                .then(1L)
+                                                .otherwise(0L)
+                                                .sum(),
+                                        new CaseBuilder()
+                                                .when(beverage.sugarLevel.eq(SugarLevel.LOW))
+                                                .then(1L)
+                                                .otherwise(0L)
+                                                .sum()))
+                        .from(beverage);
+
+        query.leftJoin(memberBeverageLike)
+                .on(
+                        beverage.id
+                                .eq(memberBeverageLike.beverage.id)
+                                .and(memberBeverageLike.member.id.eq(memberId)));
+
+        query.where(
+                beverageQueryPredicates.keywordSearch(keyword),
+                beverageQueryPredicates.sugarLevelEq(sugar),
+                beverageQueryPredicates.onlyLiked(onlyLiked));
+
+        return query.fetchOne();
     }
 
     @Override
@@ -206,9 +180,30 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
                         .on(beverage.id.eq(memberBeverageLike.beverage.id))
                         .where(
                                 memberBeverageLike.member.id.eq(memberId),
-                                brandEq(brand),
-                                sugarLevelEq(sugarLevel))
+                                beverageQueryPredicates.brandEq(brand),
+                                beverageQueryPredicates.sugarLevelEq(sugarLevel))
                         .fetchOne();
         return count != null ? count : 0L;
+    }
+
+    private BeverageCountDto countSugarLevelBy(BooleanExpression predicate) {
+        return queryFactory
+                .select(
+                        Projections.constructor(
+                                BeverageCountDto.class,
+                                beverage.count(),
+                                new CaseBuilder()
+                                        .when(beverage.sugarLevel.eq(SugarLevel.ZERO))
+                                        .then(1L)
+                                        .otherwise(0L)
+                                        .sum(),
+                                new CaseBuilder()
+                                        .when(beverage.sugarLevel.eq(SugarLevel.LOW))
+                                        .then(1L)
+                                        .otherwise(0L)
+                                        .sum()))
+                .from(beverage)
+                .where(predicate)
+                .fetchOne();
     }
 }
