@@ -81,17 +81,22 @@ public class CafeBeverageAPI {
 
     @GetMapping("/search")
     public ApiResponse<BeverageSearchResultDto> searchBeverages(
-            @RequestParam(required = false) String keyword) {
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String sugarLevel,
+            @RequestParam(required = false) Boolean onlyLiked) {
 
         String targetKeyword = (keyword == null ? "" : keyword).trim();
 
         if (!StringUtils.hasText(targetKeyword)) {
             log.info("Empty keyword");
-            return ApiResponse.success(new BeverageSearchResultDto(List.of(), 0));
+            return ApiResponse.success(new BeverageSearchResultDto(List.of(), 0, 0, 0, 0));
         }
 
+        Optional<SugarLevel> sugar = SugarLevel.fromParam(sugarLevel);
+
         BeverageSearchResultDto beverageSearchResultDto =
-                cafeBeverageQueryService.searchBeverages(targetKeyword, MEMBER_ID);
+                cafeBeverageQueryService.searchBeverages(
+                        targetKeyword, MEMBER_ID, sugar, onlyLiked);
         return ApiResponse.success(beverageSearchResultDto);
     }
 }
