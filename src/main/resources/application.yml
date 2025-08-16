@@ -5,7 +5,7 @@ spring:
     name: Ah-matdang
   profiles:
     active:
-      - dev
+      - prod
     group:
       dev:
         - dev
