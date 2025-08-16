@@ -39,6 +39,7 @@ public class Auth0JwtFilter extends OncePerRequestFilter {
         try {
             DecodedJWT jwt = verifier.verify(token);
 
+            req.setAttribute("auth0.jwt", jwt);
             req.setAttribute("auth0.sub", jwt.getSubject());
             req.setAttribute("auth0.email", jwt.getClaim("email").asString());
 
@@ -47,6 +48,7 @@ public class Auth0JwtFilter extends OncePerRequestFilter {
                 principal, null, principal.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
+            chain.doFilter(req, res);
         } catch (Exception e) {
             log.warn("JWT verification failed: {}", e.getMessage());
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
