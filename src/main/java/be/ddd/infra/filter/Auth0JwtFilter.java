@@ -1,4 +1,4 @@
-package be.ddd.api.login;
+package be.ddd.infra.filter;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.servlet.FilterChain;
