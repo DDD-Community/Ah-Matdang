@@ -1,10 +1,6 @@
 package be.ddd.application.beverage;
 
-import be.ddd.api.dto.res.BeverageCountDto;
-import be.ddd.api.dto.res.BeverageSearchResultDto;
-import be.ddd.api.dto.res.BeverageSizeDetailDto;
-import be.ddd.api.dto.res.CafeBeverageCursorPageDto;
-import be.ddd.api.dto.res.CafeBeverageDetailsDto;
+import be.ddd.api.dto.res.*;
 import be.ddd.application.beverage.dto.BeverageSearchDto;
 import be.ddd.application.beverage.dto.CafeBeveragePageDto;
 import be.ddd.application.beverage.dto.CafeStoreDto;
@@ -102,18 +98,30 @@ public class CafeBeverageQueryServiceImpl implements CafeBeverageQueryService {
     }
 
     @Override
-    public BeverageCountDto getBeverageCountByBrandAndSugarLevel(Optional<CafeBrand> brandFilter) {
+    public BeverageCountDto getBeverageCountByBrandAndSugarLevel(
+            Optional<CafeBrand> brandFilter, Long memberId) {
 
         CafeBrand brand = brandFilter.orElse(null);
 
-        return beverageRepository.countSugarLevelByBrand(brand);
+        return beverageRepository.countSugarLevelByBrand(brand, memberId);
     }
 
     @Override
-    public BeverageSearchResultDto searchBeverages(String keyword, Long memberId) {
+    public BeverageSearchResultDto searchBeverages(
+            String keyword, Long memberId, Optional<SugarLevel> sugarLevel, Boolean onlyLiked) {
         List<BeverageSearchDto> beverageSearchResults =
-                beverageRepository.searchByName(keyword, memberId);
+                beverageRepository.searchByName(keyword, memberId, sugarLevel, onlyLiked);
         long likeCount = beverageSearchResults.stream().filter(BeverageSearchDto::isLiked).count();
-        return new BeverageSearchResultDto(beverageSearchResults, likeCount);
+
+        BeverageCountDto counts =
+                beverageRepository.countSugarLevelBySearchFilters(
+                        keyword, memberId, sugarLevel, onlyLiked);
+
+        return new BeverageSearchResultDto(
+                beverageSearchResults,
+                counts.likeCount(),
+                counts.totalCount(),
+                counts.zeroCount(),
+                counts.lowCount());
     }
 }

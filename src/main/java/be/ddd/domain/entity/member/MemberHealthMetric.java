@@ -6,13 +6,11 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import java.math.BigDecimal;
 import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
 @Embeddable
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Getter
 public class MemberHealthMetric {
 
     private Integer age;
@@ -21,9 +19,9 @@ public class MemberHealthMetric {
     @ColumnDefault("0")
     private Integer heightCm;
 
-    @Column(name = "weight_kg", nullable = false, precision = 5, scale = 2)
-    @ColumnDefault("0.00")
-    private BigDecimal weightKg = BigDecimal.ZERO;
+    @Column(name = "weight_kg", nullable = false)
+    @ColumnDefault("0")
+    private Integer weightKg;
 
     @Enumerated(EnumType.STRING)
     private Gender gender;
@@ -44,7 +42,7 @@ public class MemberHealthMetric {
     public MemberHealthMetric(
             Integer age,
             Integer heightCm,
-            BigDecimal weightKg,
+            Integer weightKg,
             Gender gender,
             ActivityRange activityRange,
             SugarIntakeLevel sugarIntakeLevel) {

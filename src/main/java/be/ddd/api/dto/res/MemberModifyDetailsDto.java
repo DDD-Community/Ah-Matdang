@@ -6,7 +6,6 @@ import be.ddd.domain.entity.member.Gender;
 import be.ddd.domain.entity.member.Member;
 import be.ddd.domain.entity.member.SugarIntakeLevel;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public record MemberModifyDetailsDto(
@@ -14,7 +13,7 @@ public record MemberModifyDetailsDto(
         @JsonFormat(pattern = "yyyy-MM-dd") LocalDate birthDay,
         Gender gender,
         Integer heightCm,
-        BigDecimal weightKg,
+        Integer weightKg,
         ActivityRange activityRange,
         SugarIntakeLevel sugarIntakeLevel,
         RecommendedSugar recommendedSugar) {

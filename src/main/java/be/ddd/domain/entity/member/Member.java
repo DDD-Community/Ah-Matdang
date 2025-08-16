@@ -2,8 +2,6 @@ package be.ddd.domain.entity.member;
 
 import be.ddd.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
-
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 import lombok.AccessLevel;

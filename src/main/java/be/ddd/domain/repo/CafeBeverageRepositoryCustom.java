@@ -7,6 +7,7 @@ import be.ddd.domain.entity.crawling.CafeBrand;
 import be.ddd.domain.entity.crawling.SugarLevel;
 import jakarta.annotation.Nullable;
 import java.util.List;
+import java.util.Optional;
 
 public interface CafeBeverageRepositoryCustom {
     List<CafeBeveragePageDto> findWithCursor(
@@ -17,10 +18,14 @@ public interface CafeBeverageRepositoryCustom {
             Long memberId,
             @Nullable Boolean onlyLiked);
 
-    BeverageCountDto countSugarLevelByBrand(@Nullable CafeBrand brandFilter);
+    BeverageCountDto countSugarLevelByBrand(@Nullable CafeBrand brandFilter, Long memberId);
 
-    List<BeverageSearchDto> searchByName(String keyword, Long memberId);
+    List<BeverageSearchDto> searchByName(
+            String keyword, Long memberId, Optional<SugarLevel> sugarLevel, Boolean onlyLiked);
 
     long countAllLikedByMemberAndFilters(
             @Nullable CafeBrand brand, @Nullable SugarLevel sugarLevel, Long memberId);
+
+    BeverageCountDto countSugarLevelBySearchFilters(
+            String keyword, Long memberId, Optional<SugarLevel> sugarLevel, Boolean onlyLiked);
 }

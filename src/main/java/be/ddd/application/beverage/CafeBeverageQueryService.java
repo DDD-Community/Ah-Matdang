@@ -21,7 +21,9 @@ public interface CafeBeverageQueryService {
 
     CafeBeverageDetailsDto getCafeBeverageByProductId(UUID productId);
 
-    BeverageCountDto getBeverageCountByBrandAndSugarLevel(Optional<CafeBrand> brandFilter);
+    BeverageCountDto getBeverageCountByBrandAndSugarLevel(
+            Optional<CafeBrand> brandFilter, Long MemberId);
 
-    BeverageSearchResultDto searchBeverages(String keyword, Long memberId);
+    BeverageSearchResultDto searchBeverages(
+            String keyword, Long memberId, Optional<SugarLevel> sugarLevel, Boolean onlyLiked);
 }
