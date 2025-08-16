@@ -6,6 +6,7 @@ import be.ddd.domain.repo.MemberRepository;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -15,6 +16,7 @@ public class MemberBootstrapService {
 
     private final MemberRepository memberRepository;
 
+    @Transactional
     public UUID ensureAndGetFakeId(DecodedJWT jwt) {
         String sub = jwt.getSubject();
 
