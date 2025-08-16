@@ -18,7 +18,7 @@ public interface CafeBeverageRepositoryCustom {
             Long memberId,
             @Nullable Boolean onlyLiked);
 
-    BeverageCountDto countSugarLevelByBrand(@Nullable CafeBrand brandFilter);
+    BeverageCountDto countSugarLevelByBrand(@Nullable CafeBrand brandFilter, Long memberId);
 
     List<BeverageSearchDto> searchByName(
             String keyword, Long memberId, Optional<SugarLevel> sugarLevel, Boolean onlyLiked);
