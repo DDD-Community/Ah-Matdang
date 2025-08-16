@@ -1,10 +1,6 @@
 package be.ddd.application.beverage;
 
-import be.ddd.api.dto.res.BeverageCountDto;
-import be.ddd.api.dto.res.BeverageSearchResultDto;
-import be.ddd.api.dto.res.BeverageSizeDetailDto;
-import be.ddd.api.dto.res.CafeBeverageCursorPageDto;
-import be.ddd.api.dto.res.CafeBeverageDetailsDto;
+import be.ddd.api.dto.res.*;
 import be.ddd.application.beverage.dto.BeverageSearchDto;
 import be.ddd.application.beverage.dto.CafeBeveragePageDto;
 import be.ddd.application.beverage.dto.CafeStoreDto;

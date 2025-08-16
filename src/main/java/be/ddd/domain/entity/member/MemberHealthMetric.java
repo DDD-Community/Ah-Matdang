@@ -4,7 +4,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import java.math.BigDecimal;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,8 +18,8 @@ public class MemberHealthMetric {
     @Column(name = "height_cm", nullable = false)
     private Integer heightCm;
 
-    @Column(name = "weight_kg", nullable = false, precision = 5, scale = 2)
-    private BigDecimal weightKg;
+    @Column(name = "weight_kg", nullable = false)
+    private Integer weightKg;
 
     @Enumerated(EnumType.STRING)
     private Gender gender;
@@ -41,7 +40,7 @@ public class MemberHealthMetric {
     public MemberHealthMetric(
             Integer age,
             Integer heightCm,
-            BigDecimal weightKg,
+            Integer weightKg,
             Gender gender,
             ActivityRange activityRange,
             SugarIntakeLevel sugarIntakeLevel) {

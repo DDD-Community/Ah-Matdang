@@ -18,16 +18,21 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
 @RequiredArgsConstructor
 @Repository
 public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom {
+
+    private static final Logger log = LoggerFactory.getLogger(CafeBeverageRepositoryImpl.class);
 
     private final JPAQueryFactory queryFactory;
     private final BeverageQueryPredicates beverageQueryPredicates;
@@ -135,14 +140,14 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
     public BeverageCountDto countSugarLevelBySearchFilters(
             String keyword, Long memberId, Optional<SugarLevel> sugarLevel, Boolean onlyLiked) {
 
-        SugarLevel sugar = sugarLevel.orElse(null);
+        SugarLevel sugar = sugarLevel.orElse(SugarLevel.HIGH);
 
-        var query =
+        JPAQuery<BeverageCountDto> query =
                 queryFactory
                         .select(
                                 Projections.constructor(
                                         BeverageCountDto.class,
-                                        beverage.count(),
+                                        beverage.id.countDistinct(),
                                         new CaseBuilder()
                                                 .when(beverage.sugarLevel.eq(SugarLevel.ZERO))
                                                 .then(1L)
@@ -150,6 +155,11 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
                                                 .sum(),
                                         new CaseBuilder()
                                                 .when(beverage.sugarLevel.eq(SugarLevel.LOW))
+                                                .then(1L)
+                                                .otherwise(0L)
+                                                .sum(),
+                                        new CaseBuilder()
+                                                .when(memberBeverageLike.id.isNotNull())
                                                 .then(1L)
                                                 .otherwise(0L)
                                                 .sum()))
@@ -161,12 +171,16 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
                                 .eq(memberBeverageLike.beverage.id)
                                 .and(memberBeverageLike.member.id.eq(memberId)));
 
-        query.where(
-                beverageQueryPredicates.keywordSearch(keyword),
-                beverageQueryPredicates.sugarLevelEq(sugar),
-                beverageQueryPredicates.onlyLiked(onlyLiked));
+        query.where(beverageQueryPredicates.keywordSearch(keyword));
 
-        return query.fetchOne();
+        BeverageCountDto result = query.fetchOne();
+        log.info(
+                "countSugarLevelBySearchFilters - Total Count: {}, Zero Count: {}, Low Count: {}, Like Count: {}",
+                result.totalCount(),
+                result.zeroCount(),
+                result.lowCount(),
+                result.likeCount());
+        return result;
     }
 
     @Override
