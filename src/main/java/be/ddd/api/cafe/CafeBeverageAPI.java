@@ -63,7 +63,7 @@ public class CafeBeverageAPI {
         Optional<CafeBrand> brand =
                 Optional.ofNullable(cafeBrand).flatMap(CafeBrand::findByDisplayName);
         BeverageCountDto countDto =
-                cafeBeverageQueryService.getBeverageCountByBrandAndSugarLevel(brand);
+                cafeBeverageQueryService.getBeverageCountByBrandAndSugarLevel(brand, MEMBER_ID);
         return ApiResponse.success(countDto);
     }
 

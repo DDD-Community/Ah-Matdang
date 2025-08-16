@@ -98,11 +98,12 @@ public class CafeBeverageQueryServiceImpl implements CafeBeverageQueryService {
     }
 
     @Override
-    public BeverageCountDto getBeverageCountByBrandAndSugarLevel(Optional<CafeBrand> brandFilter) {
+    public BeverageCountDto getBeverageCountByBrandAndSugarLevel(
+            Optional<CafeBrand> brandFilter, Long memberId) {
 
         CafeBrand brand = brandFilter.orElse(null);
 
-        return beverageRepository.countSugarLevelByBrand(brand);
+        return beverageRepository.countSugarLevelByBrand(brand, memberId);
     }
 
     @Override
