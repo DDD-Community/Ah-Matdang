@@ -4,7 +4,6 @@ import be.ddd.application.member.dto.res.RecommendedSugar;
 import be.ddd.domain.entity.member.Gender;
 import be.ddd.domain.entity.member.Member;
 import be.ddd.domain.entity.member.MemberHealthMetric;
-import java.math.BigDecimal;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -35,8 +34,8 @@ public class SugarRecommendationService {
         return new RecommendedSugar(sugarMaxG, sugarIdealG);
     }
 
-    private double calculateBMR(int age, BigDecimal weight, Gender gender) {
-        double w = weight.doubleValue();
+    private double calculateBMR(int age, Integer weight, Gender gender) {
+        double w = (double) weight;
         if (age >= 18 && age <= 30) {
             return gender == Gender.MALE ? (15.3 * w + 679) : (14.7 * w + 496);
         } else if (age > 30 && age <= 60) {

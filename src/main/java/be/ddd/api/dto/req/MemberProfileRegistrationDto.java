@@ -5,7 +5,6 @@ import be.ddd.domain.entity.member.Gender;
 import be.ddd.domain.entity.member.SugarIntakeLevel;
 import io.micrometer.common.lang.NonNullApi;
 import io.micrometer.common.lang.NonNullFields;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @NonNullApi
@@ -15,6 +14,6 @@ public record MemberProfileRegistrationDto(
         LocalDate birthDay,
         Gender gender,
         Integer heightCm,
-        BigDecimal weightKg,
+        Integer weightKg,
         ActivityRange activityRange,
         SugarIntakeLevel sugarIntakeLevel) {}
