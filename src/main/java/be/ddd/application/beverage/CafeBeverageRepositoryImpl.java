@@ -194,8 +194,7 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
                         .on(beverage.id.eq(memberBeverageLike.beverage.id))
                         .where(
                                 memberBeverageLike.member.id.eq(memberId),
-                                beverageQueryPredicates.brandEq(brand),
-                                beverageQueryPredicates.sugarLevelEq(sugarLevel))
+                                beverageQueryPredicates.brandEq(brand))
                         .fetchOne();
         return count != null ? count : 0L;
     }
