@@ -33,7 +33,6 @@ public class AuthAPI {
     public ResponseEntity<Map<String, Object>> me(HttpServletRequest req) {
         DecodedJWT jwt = (DecodedJWT) req.getAttribute("auth0.jwt");
         String sub = (String) req.getAttribute("auth0.sub");
-        String email = (String) req.getAttribute("auth0.email");
 
         if (jwt == null || sub == null) {
             return ResponseEntity.status(401).build();
@@ -41,24 +40,9 @@ public class AuthAPI {
 
         UUID fakeId = bootstrapService.ensureAndGetFakeId(jwt);
 
-        var user = new LinkedHashMap<String, Object>();
-        user.put("fakeId", fakeId.toString());
-        user.put("sub", sub);
-        if (email != null) user.put("email", email); // 없으면 키 생략
-
-        var token = new LinkedHashMap<String, Object>();
-        token.put("iss", jwt.getIssuer());
-        token.put("aud", jwt.getAudience());
-        token.put("sub", sub);
-        if (!jwt.getClaim("scope").isMissing()) token.put("scope", jwt.getClaim("scope").asString());
-        if (jwt.getIssuedAt() != null) token.put("iat", jwt.getIssuedAt().toInstant());
-        if (jwt.getExpiresAt() != null) token.put("exp", jwt.getExpiresAt().toInstant());
-        if (jwt.getKeyId() != null) token.put("kid", jwt.getKeyId());
-
         var body = new LinkedHashMap<String, Object>();
         body.put("ok", true);
-        body.put("user", user);
-        body.put("token", token);
+        body.put("fakeId", fakeId.toString());
 
         return ResponseEntity.ok(body);
     }
