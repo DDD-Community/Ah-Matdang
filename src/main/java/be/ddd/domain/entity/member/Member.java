@@ -58,4 +58,11 @@ public class Member extends BaseTimeEntity {
     public void notificationSettings(NotificationSettings notificationSettings) {
         this.notificationSettings = notificationSettings;
     }
+
+    public Member(UUID fakeId, AuthProvider authProvider, String providerId) {
+        this.fakeId = fakeId;
+        this.authProvider = authProvider;
+        this.providerId = providerId;
+    }
+
 }

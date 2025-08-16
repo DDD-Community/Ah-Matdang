@@ -7,5 +7,4 @@ import java.util.Optional;
 
 public interface MemberRepositoryCustom {
     List<Member> findAllByNotificationEnabledAndReminderTime(LocalTime reminderTime);
-    Optional<Member> findByProviderId(String providerId);
 }
