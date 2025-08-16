@@ -119,7 +119,7 @@ public class CafeBeverageQueryServiceImpl implements CafeBeverageQueryService {
 
         return new BeverageSearchResultDto(
                 beverageSearchResults,
-                likeCount,
+                counts.likeCount(),
                 counts.totalCount(),
                 counts.zeroCount(),
                 counts.lowCount());

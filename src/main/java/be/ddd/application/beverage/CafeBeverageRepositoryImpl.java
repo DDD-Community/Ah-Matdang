@@ -171,7 +171,10 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
                                 .eq(memberBeverageLike.beverage.id)
                                 .and(memberBeverageLike.member.id.eq(memberId)));
 
-        query.where(beverageQueryPredicates.keywordSearch(keyword));
+        query.where(
+                beverageQueryPredicates
+                        .keywordSearch(keyword)
+                        .and(beverageQueryPredicates.onlyLiked(onlyLiked)));
 
         BeverageCountDto result = query.fetchOne();
         log.info(
