@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/demo")
+@RequestMapping("/api/auth")
 public class AuthAPI {
 
     private final MemberBootstrapService bootstrapService;
@@ -29,7 +29,7 @@ public class AuthAPI {
     }
 
     // 인증 필요 : 현재 사용자/토큰 정보
-    @GetMapping("/auth/me")
+    @GetMapping("/me")
     public ResponseEntity<Map<String, Object>> me(HttpServletRequest req) {
         DecodedJWT jwt = (DecodedJWT) req.getAttribute("auth0.jwt");
         String sub = (String) req.getAttribute("auth0.sub");

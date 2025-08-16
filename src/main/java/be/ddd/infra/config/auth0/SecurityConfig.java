@@ -5,6 +5,7 @@ import be.ddd.infra.filter.Auth0JwtVerifier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -33,7 +34,8 @@ public class SecurityConfig {
             .formLogin(f -> f.disable())
 
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**", "/demo/public").permitAll()
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // CORS preflight
+                .requestMatchers("api/auth/health").permitAll()
                 .anyRequest().authenticated()
             )
 
