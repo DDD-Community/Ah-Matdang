@@ -79,6 +79,12 @@ dependencies {
 
     implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.5'
 
+    //auth0
+    implementation 'com.auth0:java-jwt:4.4.0'
+    implementation 'com.auth0:jwks-rsa:0.22.1'
+
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
     //mapper
     implementation 'org.mapstruct:mapstruct:1.5.5.Final'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
