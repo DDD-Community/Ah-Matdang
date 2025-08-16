@@ -10,7 +10,7 @@ public record BeverageSearchDto(
         @JsonIgnore Long id,
         UUID productId,
         String name,
-        String imageUrl,
+        String imgUrl,
         BeverageType beverageType,
         CafeStoreDto cafeStoreDto,
         BeverageNutrition beverageNutrition,
@@ -21,7 +21,7 @@ public record BeverageSearchDto(
             Long id,
             UUID productId,
             String name,
-            String imageUrl,
+            String imgUrl,
             BeverageType beverageType,
             CafeStoreDto cafeStoreDto,
             BeverageNutrition beverageNutrition,
@@ -29,7 +29,7 @@ public record BeverageSearchDto(
         this.id = id;
         this.productId = productId;
         this.name = name;
-        this.imageUrl = imageUrl;
+        this.imgUrl = imgUrl;
         this.beverageType = beverageType;
         this.cafeStoreDto = cafeStoreDto;
         this.beverageNutrition = beverageNutrition;
