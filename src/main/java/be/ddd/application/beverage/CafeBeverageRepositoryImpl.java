@@ -171,10 +171,7 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
                                 .eq(memberBeverageLike.beverage.id)
                                 .and(memberBeverageLike.member.id.eq(memberId)));
 
-        query.where(
-                beverageQueryPredicates
-                        .keywordSearch(keyword)
-                        .and(beverageQueryPredicates.onlyLiked(onlyLiked)));
+        query.where(beverageQueryPredicates.keywordSearch(keyword));
 
         BeverageCountDto result = query.fetchOne();
         log.info(
@@ -195,9 +192,7 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
                         .from(beverage)
                         .innerJoin(memberBeverageLike)
                         .on(beverage.id.eq(memberBeverageLike.beverage.id))
-                        .where(
-                                memberBeverageLike.member.id.eq(memberId),
-                                beverageQueryPredicates.brandEq(brand))
+                        .where(memberBeverageLike.member.id.eq(memberId))
                         .fetchOne();
         return count != null ? count : 0L;
     }
