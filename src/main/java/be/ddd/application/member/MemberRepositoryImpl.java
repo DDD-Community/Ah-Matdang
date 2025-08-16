@@ -6,8 +6,6 @@ import be.ddd.domain.repo.MemberRepositoryCustom;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -26,15 +24,5 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
                         member.notificationSettings.isEnabled.isTrue(),
                         member.notificationSettings.reminderTime.eq(reminderTime))
                 .fetch();
-    }
-
-    @Override
-    public Optional<Member> findByProviderId(String providerId) {
-        Member result = queryFactory
-                .selectFrom(member)
-                .where(member.providerId.eq(providerId))
-                .fetchOne();
-
-        return Optional.ofNullable(result);
     }
 }
