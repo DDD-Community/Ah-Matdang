@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 @Embeddable
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -17,10 +18,12 @@ public class MemberHealthMetric {
     private Integer age;
 
     @Column(name = "height_cm", nullable = false)
+    @ColumnDefault("0")
     private Integer heightCm;
 
     @Column(name = "weight_kg", nullable = false, precision = 5, scale = 2)
-    private BigDecimal weightKg;
+    @ColumnDefault("0.00")
+    private BigDecimal weightKg = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
     private Gender gender;
