@@ -1,7 +1,7 @@
 package be.ddd.infra.config.auth0;
 
-import be.ddd.api.login.Auth0JwtFilter;
-import be.ddd.api.login.Auth0JwtVerifier;
+import be.ddd.infra.filter.Auth0JwtFilter;
+import be.ddd.infra.filter.Auth0JwtVerifier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,4 +1,4 @@
-package be.ddd.api.login.test;
+package be.ddd.api.auth;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,7 +9,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/demo")
-public class DemoController {
+public class AuthAPI {
 
     // 공개 엔드포인트 (토큰 불필요)
     @GetMapping("/public")
