@@ -80,8 +80,8 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
     }
 
     @Override
-    public BeverageCountDto countSugarLevelByBrand(@Nullable CafeBrand brandFilter) {
-        return countSugarLevelBy(beverageQueryPredicates.brandEq(brandFilter));
+    public BeverageCountDto countSugarLevelByBrand(@Nullable CafeBrand brandFilter, Long memberId) {
+        return countSugarLevelBy(beverageQueryPredicates.brandEq(brandFilter), memberId);
     }
 
     @Override
@@ -159,7 +159,7 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
                                                 .otherwise(0L)
                                                 .sum(),
                                         new CaseBuilder()
-                                                .when(memberBeverageLike.id.isNotNull())
+                                                .when(memberBeverageLike.isNotNull())
                                                 .then(1L)
                                                 .otherwise(0L)
                                                 .sum()))
@@ -200,24 +200,36 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
         return count != null ? count : 0L;
     }
 
-    private BeverageCountDto countSugarLevelBy(BooleanExpression predicate) {
-        return queryFactory
-                .select(
-                        Projections.constructor(
-                                BeverageCountDto.class,
-                                beverage.count(),
-                                new CaseBuilder()
-                                        .when(beverage.sugarLevel.eq(SugarLevel.ZERO))
-                                        .then(1L)
-                                        .otherwise(0L)
-                                        .sum(),
-                                new CaseBuilder()
-                                        .when(beverage.sugarLevel.eq(SugarLevel.LOW))
-                                        .then(1L)
-                                        .otherwise(0L)
-                                        .sum()))
-                .from(beverage)
-                .where(predicate)
+    private BeverageCountDto countSugarLevelBy(BooleanExpression predicate, Long memberId) {
+        JPAQuery<BeverageCountDto> query =
+                queryFactory
+                        .select(
+                                Projections.constructor(
+                                        BeverageCountDto.class,
+                                        beverage.count(),
+                                        new CaseBuilder()
+                                                .when(beverage.sugarLevel.eq(SugarLevel.ZERO))
+                                                .then(1L)
+                                                .otherwise(0L)
+                                                .sum(),
+                                        new CaseBuilder()
+                                                .when(beverage.sugarLevel.eq(SugarLevel.LOW))
+                                                .then(1L)
+                                                .otherwise(0L)
+                                                .sum(),
+                                        new CaseBuilder()
+                                                .when(memberBeverageLike.isNotNull())
+                                                .then(1L)
+                                                .otherwise(0L)
+                                                .sum()))
+                        .from(beverage)
+                        .where(predicate);
+
+        return query.leftJoin(memberBeverageLike)
+                .on(
+                        beverage.id
+                                .eq(memberBeverageLike.beverage.id)
+                                .and(memberBeverageLike.member.id.eq(memberId)))
                 .fetchOne();
     }
 }
