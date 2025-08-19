@@ -4,11 +4,10 @@ import be.ddd.domain.entity.member.AuthProvider;
 import be.ddd.domain.entity.member.Member;
 import be.ddd.domain.repo.MemberRepository;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -26,14 +25,16 @@ public class MemberBootstrapService {
 
         AuthProvider authProvider = mapToAuthProvider(providerPrefix);
 
-        return memberRepository.findByProviderId(providerId)
-            .map(Member::getFakeId)
-            .orElseGet(() -> {
-                UUID fakeId = UUID.randomUUID();
-                Member member = new Member(fakeId, authProvider, providerId);
-                memberRepository.save(member);
-                return fakeId;
-            });
+        return memberRepository
+                .findByProviderId(providerId)
+                .map(Member::getFakeId)
+                .orElseGet(
+                        () -> {
+                            UUID fakeId = UUID.randomUUID();
+                            Member member = new Member(fakeId, authProvider, providerId);
+                            memberRepository.save(member);
+                            return fakeId;
+                        });
     }
 
     private AuthProvider mapToAuthProvider(String p) {
@@ -44,5 +45,4 @@ public class MemberBootstrapService {
             default -> AuthProvider.UNKNOWN;
         };
     }
-
 }
