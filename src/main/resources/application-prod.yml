@@ -42,6 +42,8 @@ auth0:
   client-id: ${AUTH0_CLIENT_ID}
   client-secret: ${AUTH0_CLIENT_SECRET}
   redirect-uri: dev-o4pgsljdj1aisk3y.us.auth0.com/auth/login
+  issuer: ${AUTH0_ISSUER}
+  audience: ${AUTH0_AUDIENCE}
 
 auth:
   jwt:
