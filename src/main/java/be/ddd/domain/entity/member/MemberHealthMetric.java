@@ -7,6 +7,7 @@ import jakarta.persistence.Enumerated;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 @Embeddable
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -16,9 +17,11 @@ public class MemberHealthMetric {
     private Integer age;
 
     @Column(name = "height_cm", nullable = false)
+    @ColumnDefault("0")
     private Integer heightCm;
 
     @Column(name = "weight_kg", nullable = false)
+    @ColumnDefault("0")
     private Integer weightKg;
 
     @Enumerated(EnumType.STRING)

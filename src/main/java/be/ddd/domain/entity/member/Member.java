@@ -2,6 +2,8 @@ package be.ddd.domain.entity.member;
 
 import be.ddd.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -39,6 +41,7 @@ public class Member extends BaseTimeEntity {
     @Column(name = "birth_day")
     private LocalDate birthDay;
 
+    @Embedded
     private MemberHealthMetric memberHealthMetric;
 
     @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -58,4 +61,12 @@ public class Member extends BaseTimeEntity {
     public void notificationSettings(NotificationSettings notificationSettings) {
         this.notificationSettings = notificationSettings;
     }
+
+    public Member(UUID fakeId, AuthProvider authProvider, String providerId) {
+        this.fakeId = fakeId;
+        this.authProvider = authProvider;
+        this.providerId = providerId;
+        this.memberHealthMetric = new MemberHealthMetric();
+    }
+
 }
