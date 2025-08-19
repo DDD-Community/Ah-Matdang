@@ -5,6 +5,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Collections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -12,9 +14,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
-
-import java.io.IOException;
-import java.util.Collections;
 
 public class Auth0JwtFilter extends OncePerRequestFilter {
 
@@ -26,8 +25,9 @@ public class Auth0JwtFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
-        throws ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest req, HttpServletResponse res, FilterChain chain)
+            throws ServletException, IOException {
 
         String auth = req.getHeader("Authorization");
         if (!StringUtils.hasText(auth) || !auth.startsWith("Bearer ")) {
@@ -44,8 +44,9 @@ public class Auth0JwtFilter extends OncePerRequestFilter {
             req.setAttribute("auth0.email", jwt.getClaim("email").asString());
 
             var principal = new User(jwt.getSubject(), "", Collections.emptyList());
-            var authentication = new UsernamePasswordAuthenticationToken(
-                principal, null, principal.getAuthorities());
+            var authentication =
+                    new UsernamePasswordAuthenticationToken(
+                            principal, null, principal.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             chain.doFilter(req, res);
@@ -53,11 +54,11 @@ public class Auth0JwtFilter extends OncePerRequestFilter {
             log.warn("JWT verification failed: {}", e.getMessage());
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             res.setContentType("application/json;charset=UTF-8");
-            res.getWriter().write("""
+            res.getWriter()
+                    .write(
+                            """
                 {"status":401,"error":"Unauthorized","code":"AUTH_INVALID_TOKEN","message":"Invalid or expired access token"}
                 """);
         }
-
     }
-
 }
