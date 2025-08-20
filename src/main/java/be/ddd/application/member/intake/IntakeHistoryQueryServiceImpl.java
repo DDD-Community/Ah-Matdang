@@ -35,7 +35,9 @@ public class IntakeHistoryQueryServiceImpl implements IntakeHistoryQueryService 
     public DailyIntakeDto getDailyIntakeHistory(Long memberId, LocalDateTime date) {
         validateFutureDate(date);
         Member member =
-                memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+                memberRepository
+                        .findByIdAndDeletedAtIsNull(memberId)
+                        .orElseThrow(MemberNotFoundException::new);
         RecommendedSugar recommendedSugar =
                 new RecommendedSugar(
                         member.getMemberHealthMetric().getSugarMaxG(),
@@ -49,7 +51,9 @@ public class IntakeHistoryQueryServiceImpl implements IntakeHistoryQueryService 
     public List<DailyIntakeDto> getWeeklyIntakeHistory(Long memberId, LocalDateTime dateInWeek) {
         validateFutureDate(dateInWeek);
         Member member =
-                memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+                memberRepository
+                        .findByIdAndDeletedAtIsNull(memberId)
+                        .orElseThrow(MemberNotFoundException::new);
         RecommendedSugar recommendedSugar =
                 new RecommendedSugar(
                         member.getMemberHealthMetric().getSugarMaxG(),
@@ -86,7 +90,9 @@ public class IntakeHistoryQueryServiceImpl implements IntakeHistoryQueryService 
     public List<DailyIntakeDto> getMonthlyIntakeHistory(Long memberId, LocalDateTime dateInMonth) {
         validateFutureDate(dateInMonth);
         Member member =
-                memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+                memberRepository
+                        .findByIdAndDeletedAtIsNull(memberId)
+                        .orElseThrow(MemberNotFoundException::new);
         RecommendedSugar recommendedSugar =
                 new RecommendedSugar(
                         member.getMemberHealthMetric().getSugarMaxG(),

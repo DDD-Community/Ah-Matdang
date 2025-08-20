@@ -48,7 +48,9 @@ public class BeverageLikeServiceImpl implements BeverageLikeService {
     }
 
     private Member findMember(Long memberId) {
-        return memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        return memberRepository
+                .findByIdAndDeletedAtIsNull(memberId)
+                .orElseThrow(MemberNotFoundException::new);
     }
 
     private CafeBeverage findBeverage(UUID productId) {
