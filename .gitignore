@@ -36,7 +36,8 @@ out/
 ### VS Code ###
 .vscode/
 
-docekr/db/db
+application*.yml
+docker/db/db
 gradle.properties
 terraform/.terraform
 application-dev.yml
