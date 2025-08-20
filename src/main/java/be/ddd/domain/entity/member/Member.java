@@ -44,6 +44,9 @@ public class Member extends BaseTimeEntity {
     @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private NotificationSettings notificationSettings;
 
+    @Column(name = "deleted_at")
+    private LocalDate deletedAt;
+
     public void ofProfile(
             String nickname, LocalDate birthDay, MemberHealthMetric memberHealthMetric) {
         this.nickname = nickname;
@@ -63,6 +66,14 @@ public class Member extends BaseTimeEntity {
         this.fakeId = fakeId;
         this.authProvider = authProvider;
         this.providerId = providerId;
-        this.memberHealthMetric = new MemberHealthMetric();
+        this.memberHealthMetric = new MemberHealthMetric(null, 0, 0, null, null, null);
+    }
+
+    public void withdraw() {
+        this.deletedAt = LocalDate.now();
+    }
+
+    public boolean isDeleted() {
+        return this.deletedAt != null;
     }
 }
