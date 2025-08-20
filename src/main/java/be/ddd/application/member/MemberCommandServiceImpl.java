@@ -34,7 +34,9 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     public MemberRegistrationDetailsDto registerMemberProfile(
             UUID fakeId, MemberProfileRegistrationDto req) {
         Member member =
-                memberRepository.findByFakeId(fakeId).orElseThrow(MemberNotFoundException::new);
+                memberRepository
+                        .findByFakeIdAndDeletedAtIsNull(fakeId)
+                        .orElseThrow(MemberNotFoundException::new);
 
         LocalDate birthDay = req.birthDay();
         MemberHealthMetric healthMetric =
@@ -59,13 +61,30 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     @Override
     public MemberModifyDetailsDto modifyMemberProfile(UUID fakeId, MemberProfileModifyDto req) {
         Member member =
-                memberRepository.findByFakeId(fakeId).orElseThrow(MemberNotFoundException::new);
+                memberRepository
+                        .findByFakeIdAndDeletedAtIsNull(fakeId)
+                        .orElseThrow(MemberNotFoundException::new);
 
         memberProfileMapper.modifyFromDto(req, member);
 
         RecommendedSugar recommendedSugar = updateSugarRecommendation(member);
 
         return MemberModifyDetailsDto.from(member, recommendedSugar);
+    }
+
+    @Override
+    public void withdrawMember(UUID fakeId) {
+        Member member =
+                memberRepository
+                        .findByFakeIdAndDeletedAtIsNull(fakeId)
+                        .orElseThrow(MemberNotFoundException::new);
+
+        if (member.isDeleted()) {
+            throw new InvalidInputException("이미 탈퇴한 회원입니다.");
+        }
+
+        member.withdraw();
+        memberRepository.save(member);
     }
 
     private RecommendedSugar updateSugarRecommendation(Member member) {

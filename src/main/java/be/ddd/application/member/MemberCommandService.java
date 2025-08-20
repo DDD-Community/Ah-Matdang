@@ -12,4 +12,6 @@ public interface MemberCommandService {
 
     MemberModifyDetailsDto modifyMemberProfile(
             UUID fakeId, MemberProfileModifyDto memberProfileModifyDto);
+
+    void withdrawMember(UUID fakeId);
 }
