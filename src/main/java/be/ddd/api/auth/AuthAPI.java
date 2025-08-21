@@ -37,7 +37,7 @@ public class AuthAPI {
     public ResponseEntity<Map<String, Object>> me(HttpServletRequest req) {
         UUID fakeId = extractAuthenticatedFakeId(req);
 
-        var body = new LinkedHashMap<String, Object>();
+        Map<String, Object> body = new LinkedHashMap<>();
         body.put("ok", true);
         body.put("fakeId", fakeId.toString());
 
@@ -49,7 +49,7 @@ public class AuthAPI {
         UUID fakeId = extractAuthenticatedFakeId(req);
         memberCommandService.withdrawMember(fakeId);
 
-        var body = new LinkedHashMap<String, Object>();
+        Map<String, Object> body = new LinkedHashMap<>();
         body.put("ok", true);
         body.put("message", "회원 탈퇴가 완료되었습니다.");
 
