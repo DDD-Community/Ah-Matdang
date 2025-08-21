@@ -20,7 +20,7 @@ public class NotificationSettingsQueryServiceImpl implements NotificationSetting
     public NotificationSettingsResponseDto getNotificationSettings(UUID memberFakeId) {
         Member member =
                 memberRepository
-                        .findByFakeId(memberFakeId)
+                        .findByFakeIdAndDeletedAtIsNull(memberFakeId)
                         .orElseThrow(MemberNotFoundException::new);
 
         return NotificationSettingsResponseDto.from(member.getNotificationSettings());

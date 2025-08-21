@@ -4,6 +4,7 @@ import be.ddd.domain.entity.member.AuthProvider;
 import be.ddd.domain.entity.member.Member;
 import be.ddd.domain.repo.MemberRepository;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,16 +26,26 @@ public class MemberBootstrapService {
 
         AuthProvider authProvider = mapToAuthProvider(providerPrefix);
 
-        return memberRepository
-                .findByProviderId(providerId)
-                .map(Member::getFakeId)
-                .orElseGet(
-                        () -> {
-                            UUID fakeId = UUID.randomUUID();
-                            Member member = new Member(fakeId, authProvider, providerId);
-                            memberRepository.save(member);
-                            return fakeId;
-                        });
+        // 1. 활성 회원 조회
+        Optional<Member> activeMember =
+                memberRepository.findByProviderIdAndDeletedAtIsNull(providerId);
+        if (activeMember.isPresent()) {
+            return activeMember.get().getFakeId();
+        }
+
+        // 2. 탈퇴한 회원이 있는지 조회 (provider_id만으로)
+        Optional<Member> deletedMember = memberRepository.findByProviderId(providerId);
+        if (deletedMember.isPresent()) {
+            // 탈퇴한 회원이 있으면 즉시 삭제하고 새 계정 생성
+            memberRepository.delete(deletedMember.get());
+            memberRepository.flush(); // DB에 즉시 반영
+        }
+
+        // 3. 새 계정 생성
+        UUID fakeId = UUID.randomUUID();
+        Member member = new Member(fakeId, authProvider, providerId);
+        memberRepository.save(member);
+        return fakeId;
     }
 
     private AuthProvider mapToAuthProvider(String p) {

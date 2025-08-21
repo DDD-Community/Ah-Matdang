@@ -21,6 +21,7 @@ public class MemberRepositoryImpl implements MemberRepositoryCustom {
         return queryFactory
                 .selectFrom(member)
                 .where(
+                        member.deletedAt.isNull(),
                         member.notificationSettings.isEnabled.isTrue(),
                         member.notificationSettings.reminderTime.eq(reminderTime))
                 .fetch();

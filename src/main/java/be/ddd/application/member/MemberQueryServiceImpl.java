@@ -19,7 +19,9 @@ public class MemberQueryServiceImpl implements MemberQueryService {
     @Override
     public MemberDetailsDto checkMemberProfile(UUID fakeId) {
         Member member =
-                memberRepository.findByFakeId(fakeId).orElseThrow(MemberNotFoundException::new);
+                memberRepository
+                        .findByFakeIdAndDeletedAtIsNull(fakeId)
+                        .orElseThrow(MemberNotFoundException::new);
         return MemberDetailsDto.from(member);
     }
 }
