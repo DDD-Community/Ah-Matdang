@@ -28,7 +28,7 @@ public class NotificationSettingsCommandServiceImpl implements NotificationSetti
             UUID memberFakeId, NotificationSettingsUpdateRequestDto dto) {
         Member member =
                 memberRepository
-                        .findByFakeId(memberFakeId)
+                        .findByFakeIdAndDeletedAtIsNull(memberFakeId)
                         .orElseThrow(MemberNotFoundException::new);
         NotificationSettings settings = member.getNotificationSettings();
         log.info("setting: {}", dto.isEnabled());

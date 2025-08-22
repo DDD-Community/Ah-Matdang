@@ -1,8 +1,11 @@
 package be.ddd.domain.entity.member;
 
 import be.ddd.common.entity.BaseTimeEntity;
+import be.ddd.domain.entity.member.intake.IntakeHistory;
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -44,6 +47,16 @@ public class Member extends BaseTimeEntity {
     @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private NotificationSettings notificationSettings;
 
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<IntakeHistory> intakeHistories =
+            new ArrayList<>(); // Initialize to avoid NullPointerException
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MemberBeverageLike> memberBeverageLikes = new ArrayList<>(); // Initialize
+
+    @Column(name = "deleted_at")
+    private LocalDate deletedAt;
+
     public void ofProfile(
             String nickname, LocalDate birthDay, MemberHealthMetric memberHealthMetric) {
         this.nickname = nickname;
@@ -63,6 +76,14 @@ public class Member extends BaseTimeEntity {
         this.fakeId = fakeId;
         this.authProvider = authProvider;
         this.providerId = providerId;
-        this.memberHealthMetric = new MemberHealthMetric();
+        this.memberHealthMetric = new MemberHealthMetric(null, 0, 0, null, null, null);
+    }
+
+    public void withdraw() {
+        this.deletedAt = LocalDate.now();
+    }
+
+    public boolean isDeleted() {
+        return this.deletedAt != null;
     }
 }

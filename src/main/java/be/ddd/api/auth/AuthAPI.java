@@ -1,12 +1,15 @@
 package be.ddd.api.auth;
 
+import be.ddd.api.dto.res.auth.HealthResponseDto;
+import be.ddd.api.dto.res.auth.MeResponseDto;
+import be.ddd.api.dto.res.auth.WithdrawResponseDto;
 import be.ddd.application.member.MemberBootstrapService;
+import be.ddd.application.member.MemberCommandService;
+import be.ddd.common.dto.ApiResponse;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.UUID;
-import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,33 +19,40 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthAPI {
 
     private final MemberBootstrapService bootstrapService;
+    private final MemberCommandService memberCommandService;
 
-    public AuthAPI(MemberBootstrapService bootstrapService) {
+    public AuthAPI(
+            MemberBootstrapService bootstrapService, MemberCommandService memberCommandService) {
         this.bootstrapService = bootstrapService;
+        this.memberCommandService = memberCommandService;
     }
 
-    // 퍼블릭 헬스 체크
     @GetMapping("/health")
-    public Map<String, Object> health() {
-        return Map.of("ok", true);
+    public ApiResponse<HealthResponseDto> health() {
+        return ApiResponse.success(new HealthResponseDto(true));
     }
 
-    // 인증 필요 : 현재 사용자/토큰 정보
     @GetMapping("/me")
-    public ResponseEntity<Map<String, Object>> me(HttpServletRequest req) {
+    public ApiResponse<MeResponseDto> me(HttpServletRequest req) {
+        UUID fakeId = extractAuthenticatedFakeId(req);
+        return ApiResponse.success(new MeResponseDto(fakeId));
+    }
+
+    @DeleteMapping("/withdraw")
+    public ApiResponse<WithdrawResponseDto> withdraw(HttpServletRequest req) {
+        UUID fakeId = extractAuthenticatedFakeId(req);
+        memberCommandService.withdrawMember(fakeId);
+        return ApiResponse.success(new WithdrawResponseDto("회원탈퇴가 완료 되었습니다."));
+    }
+
+    private UUID extractAuthenticatedFakeId(HttpServletRequest req) {
         DecodedJWT jwt = (DecodedJWT) req.getAttribute("auth0.jwt");
         String sub = (String) req.getAttribute("auth0.sub");
 
         if (jwt == null || sub == null) {
-            return ResponseEntity.status(401).build();
+            throw new RuntimeException("Authentication required");
         }
 
-        UUID fakeId = bootstrapService.ensureAndGetFakeId(jwt);
-
-        var body = new LinkedHashMap<String, Object>();
-        body.put("ok", true);
-        body.put("fakeId", fakeId.toString());
-
-        return ResponseEntity.ok(body);
+        return bootstrapService.ensureAndGetFakeId(jwt);
     }
 }

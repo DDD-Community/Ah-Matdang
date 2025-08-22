@@ -36,7 +36,9 @@ public class IntakeHistoryCommandServiceImpl implements IntakeHistoryCommandServ
         }
 
         Member member =
-                memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+                memberRepository
+                        .findByIdAndDeletedAtIsNull(memberId)
+                        .orElseThrow(MemberNotFoundException::new);
         CafeBeverage beverage =
                 cafeBeverageRepository
                         .findByProductId(requestDto.productId())
