@@ -1,8 +1,11 @@
 package be.ddd.domain.entity.member;
 
 import be.ddd.common.entity.BaseTimeEntity;
+import be.ddd.domain.entity.member.intake.IntakeHistory;
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -43,6 +46,13 @@ public class Member extends BaseTimeEntity {
 
     @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private NotificationSettings notificationSettings;
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<IntakeHistory> intakeHistories =
+            new ArrayList<>(); // Initialize to avoid NullPointerException
+
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MemberBeverageLike> memberBeverageLikes = new ArrayList<>(); // Initialize
 
     @Column(name = "deleted_at")
     private LocalDate deletedAt;
