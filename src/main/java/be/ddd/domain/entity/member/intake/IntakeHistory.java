@@ -1,6 +1,7 @@
 package be.ddd.domain.entity.member.intake;
 
 import be.ddd.common.entity.BaseTimeEntity;
+import be.ddd.domain.entity.crawling.BeverageSize;
 import be.ddd.domain.entity.crawling.CafeBeverage;
 import be.ddd.domain.entity.member.Member;
 import jakarta.persistence.*;
@@ -33,9 +34,18 @@ public class IntakeHistory extends BaseTimeEntity {
     @JoinColumn(name = "beverage_id", nullable = false)
     private CafeBeverage cafeBeverage;
 
-    public IntakeHistory(Member member, LocalDateTime intakeTime, CafeBeverage cafeBeverage) {
+    @Enumerated(EnumType.STRING) // Added
+    @Column(name = "size_type", nullable = false) // Added
+    private BeverageSize sizeType; // Added
+
+    public IntakeHistory(
+            Member member,
+            LocalDateTime intakeTime,
+            CafeBeverage cafeBeverage,
+            BeverageSize sizeType) { // Modified
         this.member = member;
         this.intakeTime = intakeTime;
         this.cafeBeverage = cafeBeverage;
+        this.sizeType = sizeType; // Added
     }
 }

@@ -1,0 +1,2 @@
+ALTER TABLE intake_history
+    ADD COLUMN size_type VARCHAR(255) NOT NULL DEFAULT 'OTHER';
