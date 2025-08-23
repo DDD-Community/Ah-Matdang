@@ -38,9 +38,15 @@ public class IntakeHistoryRepositoryImpl implements IntakeHistoryRepositoryCusto
                                 beverageSizeInfo.beverageNutrition,
                                 intakeHistory.cafeBeverage.imgUrl,
                                 intakeHistory.cafeBeverage.sugarLevel,
-                                beverageSizeInfo.sizeType))
+                                intakeHistory.sizeType))
                 .from(intakeHistory)
-                .leftJoin(intakeHistory.cafeBeverage.sizes, beverageSizeInfo)
+                .leftJoin(beverageSizeInfo)
+                .on(
+                        beverageSizeInfo
+                                .cafeBeverage
+                                .id
+                                .eq(intakeHistory.cafeBeverage.id)
+                                .and(beverageSizeInfo.sizeType.eq(intakeHistory.sizeType)))
                 .where(
                         intakeHistory.member.id.eq(memberId),
                         intakeHistory.intakeTime.between(startOfDay, endOfDay))
@@ -65,9 +71,15 @@ public class IntakeHistoryRepositoryImpl implements IntakeHistoryRepositoryCusto
                                 beverageSizeInfo.beverageNutrition,
                                 intakeHistory.cafeBeverage.imgUrl,
                                 intakeHistory.cafeBeverage.sugarLevel,
-                                beverageSizeInfo.sizeType))
+                                intakeHistory.sizeType))
                 .from(intakeHistory)
-                .leftJoin(intakeHistory.cafeBeverage.sizes, beverageSizeInfo)
+                .leftJoin(beverageSizeInfo)
+                .on(
+                        beverageSizeInfo
+                                .cafeBeverage
+                                .id
+                                .eq(intakeHistory.cafeBeverage.id)
+                                .and(beverageSizeInfo.sizeType.eq(intakeHistory.sizeType)))
                 .where(
                         intakeHistory.member.id.eq(memberId),
                         intakeHistory.intakeTime.between(startDateTime, endDateTime))

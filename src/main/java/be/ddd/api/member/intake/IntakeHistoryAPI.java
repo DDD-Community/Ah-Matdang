@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/intake-histories")
 @RequiredArgsConstructor
 @Validated
+@Log4j2
 public class IntakeHistoryAPI {
 
     private final IntakeHistoryCommandService intakeHistoryCommand;
@@ -31,7 +33,9 @@ public class IntakeHistoryAPI {
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<?> registerIntake(
             @RequestBody @Valid IntakeRegistrationRequestDto requestDto) {
-        Long historyId = intakeHistoryCommand.registerIntake(MEMBER_ID, requestDto);
+        log.info("product Id :{}", requestDto.productId());
+        Long historyId =
+                intakeHistoryCommand.registerIntake(MEMBER_ID, requestDto, requestDto.size());
         return ApiResponse.success(historyId);
     }
 
