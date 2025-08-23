@@ -17,9 +17,15 @@ public record DailyIntakeDto(
         this(
                 date,
                 records,
-                records.stream().mapToInt(r -> r.nutrition().getServingKcal()).sum(),
-                records.stream().mapToInt(r -> r.nutrition().getSugarG()).sum(),
-                records.stream().mapToInt(r -> r.nutrition().getCaffeineMg()).sum(),
+                records.stream()
+                        .mapToInt(r -> r.nutrition() != null ? r.nutrition().getServingKcal() : 0)
+                        .sum(),
+                records.stream()
+                        .mapToInt(r -> r.nutrition() != null ? r.nutrition().getSugarG() : 0)
+                        .sum(),
+                records.stream()
+                        .mapToInt(r -> r.nutrition() != null ? r.nutrition().getCaffeineMg() : 0)
+                        .sum(),
                 recommendedSugar);
     }
 }
