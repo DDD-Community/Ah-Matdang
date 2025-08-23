@@ -1,5 +1,6 @@
 package be.ddd.application.member;
 
+import be.ddd.api.dto.res.auth.MeResponseDto;
 import be.ddd.domain.entity.member.AuthProvider;
 import be.ddd.domain.entity.member.Member;
 import be.ddd.domain.repo.MemberRepository;
@@ -17,7 +18,7 @@ public class MemberBootstrapService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public UUID ensureAndGetFakeId(DecodedJWT jwt) {
+    public MeResponseDto ensureAndGetFakeId(DecodedJWT jwt) {
         String sub = jwt.getSubject();
 
         int bar = sub.indexOf('|');
@@ -30,7 +31,7 @@ public class MemberBootstrapService {
         Optional<Member> activeMember =
                 memberRepository.findByProviderIdAndDeletedAtIsNull(providerId);
         if (activeMember.isPresent()) {
-            return activeMember.get().getFakeId();
+            return new MeResponseDto(activeMember.get().getFakeId(), false);
         }
 
         // 2. 탈퇴한 회원이 있는지 조회 (provider_id만으로)
@@ -45,7 +46,7 @@ public class MemberBootstrapService {
         UUID fakeId = UUID.randomUUID();
         Member member = new Member(fakeId, authProvider, providerId);
         memberRepository.save(member);
-        return fakeId;
+        return new MeResponseDto(fakeId, true);
     }
 
     private AuthProvider mapToAuthProvider(String p) {

@@ -6,9 +6,9 @@ import be.ddd.api.dto.res.auth.WithdrawResponseDto;
 import be.ddd.application.member.MemberBootstrapService;
 import be.ddd.application.member.MemberCommandService;
 import be.ddd.common.dto.ApiResponse;
+import be.ddd.domain.exception.AuthenticationBadRequest;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.UUID;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,23 +34,23 @@ public class AuthAPI {
 
     @GetMapping("/me")
     public ApiResponse<MeResponseDto> me(HttpServletRequest req) {
-        UUID fakeId = extractAuthenticatedFakeId(req);
-        return ApiResponse.success(new MeResponseDto(fakeId));
+        MeResponseDto res = extractAuthenticatedMetadata(req);
+        return ApiResponse.success(res);
     }
 
     @DeleteMapping("/withdraw")
     public ApiResponse<WithdrawResponseDto> withdraw(HttpServletRequest req) {
-        UUID fakeId = extractAuthenticatedFakeId(req);
-        memberCommandService.withdrawMember(fakeId);
+        MeResponseDto res = extractAuthenticatedMetadata(req);
+        memberCommandService.withdrawMember(res.fakeId());
         return ApiResponse.success(new WithdrawResponseDto("회원탈퇴가 완료 되었습니다."));
     }
 
-    private UUID extractAuthenticatedFakeId(HttpServletRequest req) {
+    private MeResponseDto extractAuthenticatedMetadata(HttpServletRequest req) {
         DecodedJWT jwt = (DecodedJWT) req.getAttribute("auth0.jwt");
         String sub = (String) req.getAttribute("auth0.sub");
 
         if (jwt == null || sub == null) {
-            throw new RuntimeException("Authentication required");
+            throw new AuthenticationBadRequest();
         }
 
         return bootstrapService.ensureAndGetFakeId(jwt);
