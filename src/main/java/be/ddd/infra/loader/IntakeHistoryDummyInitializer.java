@@ -1,5 +1,6 @@
 package be.ddd.infra.loader;
 
+import be.ddd.domain.entity.crawling.BeverageSize;
 import be.ddd.domain.entity.crawling.CafeBeverage;
 import be.ddd.domain.entity.member.Member;
 import be.ddd.domain.entity.member.intake.IntakeHistory;
@@ -74,7 +75,8 @@ public class IntakeHistoryDummyInitializer {
                         beverageRepository
                                 .findByProductId(pid)
                                 .orElseThrow(CafeBeverageNotFoundException::new);
-                IntakeHistory history = new IntakeHistory(targetMember, when, targetBeverage);
+                IntakeHistory history =
+                        new IntakeHistory(targetMember, when, targetBeverage, BeverageSize.TALL);
                 intakeHistoryRepository.save(history);
             }
         }

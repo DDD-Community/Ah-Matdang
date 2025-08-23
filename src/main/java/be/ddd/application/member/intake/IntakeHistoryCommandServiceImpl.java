@@ -2,14 +2,15 @@ package be.ddd.application.member.intake;
 
 import be.ddd.api.dto.req.IntakeRegistrationRequestDto;
 import be.ddd.common.util.CustomClock;
-import be.ddd.domain.entity.crawling.CafeBeverage;
+import be.ddd.domain.entity.crawling.BeverageSize;
+import be.ddd.domain.entity.crawling.BeverageSizeInfo;
 import be.ddd.domain.entity.member.Member;
 import be.ddd.domain.entity.member.intake.IntakeHistory;
 import be.ddd.domain.exception.CafeBeverageNotFoundException;
 import be.ddd.domain.exception.FutureDateNotAllowedException;
 import be.ddd.domain.exception.IntakeHistoryNotFoundException;
 import be.ddd.domain.exception.MemberNotFoundException;
-import be.ddd.domain.repo.CafeBeverageRepository;
+import be.ddd.domain.repo.BeverageSizeInfoRepository;
 import be.ddd.domain.repo.IntakeHistoryRepository;
 import be.ddd.domain.repo.MemberRepository;
 import java.time.LocalDateTime;
@@ -27,10 +28,11 @@ public class IntakeHistoryCommandServiceImpl implements IntakeHistoryCommandServ
 
     private final IntakeHistoryRepository intakeHistoryRepository;
     private final MemberRepository memberRepository;
-    private final CafeBeverageRepository cafeBeverageRepository;
+    private final BeverageSizeInfoRepository beverageSizeInfoRepository;
 
     @Override
-    public Long registerIntake(Long memberId, IntakeRegistrationRequestDto requestDto) {
+    public Long registerIntake(
+            Long memberId, IntakeRegistrationRequestDto requestDto, BeverageSize size) {
         if (isFuture(requestDto.intakeTime())) {
             throw new FutureDateNotAllowedException();
         }
@@ -39,12 +41,15 @@ public class IntakeHistoryCommandServiceImpl implements IntakeHistoryCommandServ
                 memberRepository
                         .findByIdAndDeletedAtIsNull(memberId)
                         .orElseThrow(MemberNotFoundException::new);
-        CafeBeverage beverage =
-                cafeBeverageRepository
-                        .findByProductId(requestDto.productId())
+
+        BeverageSizeInfo beverageSizeInfo =
+                beverageSizeInfoRepository
+                        .findWithBeverageByProductIdAndSizeType(requestDto.productId(), size)
                         .orElseThrow(CafeBeverageNotFoundException::new);
 
-        IntakeHistory intakeHistory = new IntakeHistory(member, requestDto.intakeTime(), beverage);
+        IntakeHistory intakeHistory =
+                new IntakeHistory(
+                        member, requestDto.intakeTime(), beverageSizeInfo.getCafeBeverage(), size);
         IntakeHistory history = intakeHistoryRepository.save(intakeHistory);
 
         return history.getId();
