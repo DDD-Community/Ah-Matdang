@@ -53,7 +53,12 @@ public enum ErrorCode {
     INTAKE_HISTORY_NOT_FOUND(
             HttpStatus.BAD_REQUEST,
             "음료 섭취 기록을 찾을 수 없습니다.",
-            Set.of(IntakeHistoryNotFoundException.class));
+            Set.of(IntakeHistoryNotFoundException.class)),
+    // AUTH
+    AUTH_BAD_REQUEST(
+            HttpStatus.BAD_REQUEST,
+            "인증 인가에 필요한 정보가 없습니다. 토큰을 확인해주세요.",
+            Set.of(AuthenticationBadRequest.class));
 
     private final HttpStatusCode status;
     private final String code;
