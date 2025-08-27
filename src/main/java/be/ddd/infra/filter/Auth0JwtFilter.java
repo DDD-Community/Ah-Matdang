@@ -59,7 +59,6 @@ public class Auth0JwtFilter extends OncePerRequestFilter {
             String providerId = jwt.getSubject();
             log.info("Auth0JwtFilter: Setting providerId as principal: {}", providerId);
 
-            // Use the providerId (Auth0 subject) as principal
             var authentication =
                     new UsernamePasswordAuthenticationToken(
                             providerId, null, Collections.emptyList());
