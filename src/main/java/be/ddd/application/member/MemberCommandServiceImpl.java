@@ -6,6 +6,7 @@ import be.ddd.api.dto.res.MemberModifyDetailsDto;
 import be.ddd.api.dto.res.MemberRegistrationDetailsDto;
 import be.ddd.application.member.dto.res.RecommendedSugar;
 import be.ddd.common.mapper.MemberProfileMapper;
+import be.ddd.domain.entity.member.AuthProvider;
 import be.ddd.domain.entity.member.Member;
 import be.ddd.domain.entity.member.MemberHealthMetric;
 import be.ddd.domain.entity.member.NotificationSettings;
@@ -14,6 +15,7 @@ import be.ddd.domain.exception.MemberNotFoundException;
 import be.ddd.domain.repo.MemberRepository;
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -85,6 +87,18 @@ public class MemberCommandServiceImpl implements MemberCommandService {
 
         member.withdraw();
         memberRepository.save(member);
+    }
+
+    @Override
+    public Member findOrCreateMemberByProviderId(String providerId) {
+        Optional<Member> existingMember = memberRepository.findByProviderId(providerId);
+        if (existingMember.isPresent()) {
+            return existingMember.get();
+        } else {
+            // Create a new member for the first login via Auth0
+            Member newMember = new Member(UUID.randomUUID(), AuthProvider.UNKNOWN, providerId);
+            return memberRepository.save(newMember);
+        }
     }
 
     private RecommendedSugar updateSugarRecommendation(Member member) {

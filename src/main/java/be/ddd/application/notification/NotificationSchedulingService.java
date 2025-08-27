@@ -37,7 +37,8 @@ public class NotificationSchedulingService {
             return;
         }
 
-        List<Long> memberIds = members.stream().map(Member::getId).collect(Collectors.toList());
+        List<String> memberIds =
+                members.stream().map(Member::getProviderId).collect(Collectors.toList());
 
         Map<Long, Double> totalSugars =
                 intakeHistoryRepository.sumSugarByMemberIdsAndDate(memberIds, LocalDateTime.now());

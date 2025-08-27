@@ -24,4 +24,13 @@ public class MemberQueryServiceImpl implements MemberQueryService {
                         .orElseThrow(MemberNotFoundException::new);
         return MemberDetailsDto.from(member);
     }
+
+    @Override
+    public Long getMemberIdByProviderId(String providerId) {
+        Member member =
+                memberRepository
+                        .findByProviderId(providerId)
+                        .orElseThrow(MemberNotFoundException::new);
+        return member.getId();
+    }
 }

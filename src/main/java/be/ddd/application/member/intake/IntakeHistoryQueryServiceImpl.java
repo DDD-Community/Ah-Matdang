@@ -32,27 +32,28 @@ public class IntakeHistoryQueryServiceImpl implements IntakeHistoryQueryService 
     private final CafeBeverageRepository cafeBeverageRepository;
 
     @Override
-    public DailyIntakeDto getDailyIntakeHistory(Long memberId, LocalDateTime date) {
+    public DailyIntakeDto getDailyIntakeHistory(String providerId, LocalDateTime date) {
         validateFutureDate(date);
         Member member =
                 memberRepository
-                        .findByIdAndDeletedAtIsNull(memberId)
+                        .findByProviderId(providerId)
                         .orElseThrow(MemberNotFoundException::new);
         RecommendedSugar recommendedSugar =
                 new RecommendedSugar(
                         member.getMemberHealthMetric().getSugarMaxG(),
                         member.getMemberHealthMetric().getSugarIdealG());
         List<IntakeRecordDto> records =
-                intakeHistoryRepository.findByMemberIdAndDate(memberId, date);
+                intakeHistoryRepository.findByMemberIdAndDate(providerId, date);
         return new DailyIntakeDto(date, records, recommendedSugar);
     }
 
     @Override
-    public List<DailyIntakeDto> getWeeklyIntakeHistory(Long memberId, LocalDateTime dateInWeek) {
+    public List<DailyIntakeDto> getWeeklyIntakeHistory(
+            String providerId, LocalDateTime dateInWeek) {
         validateFutureDate(dateInWeek);
         Member member =
                 memberRepository
-                        .findByIdAndDeletedAtIsNull(memberId)
+                        .findByProviderId(providerId)
                         .orElseThrow(MemberNotFoundException::new);
         RecommendedSugar recommendedSugar =
                 new RecommendedSugar(
@@ -64,7 +65,7 @@ public class IntakeHistoryQueryServiceImpl implements IntakeHistoryQueryService 
 
         List<IntakeRecordDto> records =
                 intakeHistoryRepository.findByMemberIdAndDateBetween(
-                        memberId, startOfWeek, endOfWeek);
+                        providerId, startOfWeek, endOfWeek);
 
         Map<LocalDateTime, List<IntakeRecordDto>> recordsByDate =
                 records.stream()
@@ -87,11 +88,12 @@ public class IntakeHistoryQueryServiceImpl implements IntakeHistoryQueryService 
     }
 
     @Override
-    public List<DailyIntakeDto> getMonthlyIntakeHistory(Long memberId, LocalDateTime dateInMonth) {
+    public List<DailyIntakeDto> getMonthlyIntakeHistory(
+            String providerId, LocalDateTime dateInMonth) {
         validateFutureDate(dateInMonth);
         Member member =
                 memberRepository
-                        .findByIdAndDeletedAtIsNull(memberId)
+                        .findByProviderId(providerId)
                         .orElseThrow(MemberNotFoundException::new);
         RecommendedSugar recommendedSugar =
                 new RecommendedSugar(
@@ -107,7 +109,7 @@ public class IntakeHistoryQueryServiceImpl implements IntakeHistoryQueryService 
 
         List<IntakeRecordDto> records =
                 intakeHistoryRepository.findByMemberIdAndDateBetween(
-                        memberId, calendarStartDate, calendarEndDate);
+                        providerId, calendarStartDate, calendarEndDate);
 
         Map<LocalDateTime, List<IntakeRecordDto>> recordsByDate =
                 records.stream()

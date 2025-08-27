@@ -2,7 +2,6 @@ package be.ddd.application.member.intake;
 
 import be.ddd.api.dto.req.IntakeRegistrationRequestDto;
 import be.ddd.common.util.CustomClock;
-import be.ddd.domain.entity.crawling.BeverageSize;
 import be.ddd.domain.entity.crawling.BeverageSizeInfo;
 import be.ddd.domain.entity.member.Member;
 import be.ddd.domain.entity.member.intake.IntakeHistory;
@@ -31,36 +30,40 @@ public class IntakeHistoryCommandServiceImpl implements IntakeHistoryCommandServ
     private final BeverageSizeInfoRepository beverageSizeInfoRepository;
 
     @Override
-    public Long registerIntake(
-            Long memberId, IntakeRegistrationRequestDto requestDto, BeverageSize size) {
+    public Long registerIntake(String providerId, IntakeRegistrationRequestDto requestDto) {
         if (isFuture(requestDto.intakeTime())) {
             throw new FutureDateNotAllowedException();
         }
 
         Member member =
                 memberRepository
-                        .findByIdAndDeletedAtIsNull(memberId)
+                        .findByProviderId(providerId)
                         .orElseThrow(MemberNotFoundException::new);
 
         BeverageSizeInfo beverageSizeInfo =
                 beverageSizeInfoRepository
-                        .findWithBeverageByProductIdAndSizeType(requestDto.productId(), size)
+                        .findWithBeverageByProductIdAndSizeType(
+                                requestDto.productId(), requestDto.size())
                         .orElseThrow(CafeBeverageNotFoundException::new);
 
         IntakeHistory intakeHistory =
                 new IntakeHistory(
-                        member, requestDto.intakeTime(), beverageSizeInfo.getCafeBeverage(), size);
+                        member,
+                        requestDto.intakeTime(),
+                        beverageSizeInfo.getCafeBeverage(),
+                        requestDto.size());
         IntakeHistory history = intakeHistoryRepository.save(intakeHistory);
 
         return history.getId();
     }
 
     @Override
-    public void deleteIntakeHistory(Long memberId, UUID productId, LocalDateTime intakeTime) {
-        log.info("memberId:{}", memberId);
+    public void deleteIntakeHistory(String providerId, UUID productId, LocalDateTime intakeTime) {
+        log.info("providerId:{}", providerId);
         log.info("productId:{}", productId);
         log.info("intakeTime:{}", intakeTime);
-        long deleted = intakeHistoryRepository.deleteIntakeHistory(memberId, productId, intakeTime);
+        long deleted =
+                intakeHistoryRepository.deleteIntakeHistory(providerId, productId, intakeTime);
 
         if (deleted == 0) {
             throw new IntakeHistoryNotFoundException();
