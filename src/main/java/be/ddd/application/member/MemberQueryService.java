@@ -5,4 +5,6 @@ import java.util.UUID;
 
 public interface MemberQueryService {
     MemberDetailsDto checkMemberProfile(UUID fakeId);
+
+    Long getMemberIdByProviderId(String providerId);
 }

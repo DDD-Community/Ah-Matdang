@@ -9,9 +9,11 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import java.net.URL;
 import java.security.interfaces.RSAPublicKey;
 import java.util.concurrent.TimeUnit;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class Auth0JwtVerifier {
 
@@ -38,7 +40,9 @@ public class Auth0JwtVerifier {
         var jwk = jwkProvider.get(unverified.getKeyId());
         var publicKey = (RSAPublicKey) jwk.getPublicKey();
         var alg = Algorithm.RSA256(publicKey, null);
-
+        log.info("jwk :{}", jwk);
+        log.info("alg :{}", alg);
+        log.info("publicKey :{}", publicKey);
         JWTVerifier verifier =
                 JWT.require(alg).withIssuer(issuer).withAudience(audience).acceptLeeway(3).build();
 

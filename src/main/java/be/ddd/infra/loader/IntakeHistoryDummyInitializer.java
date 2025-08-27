@@ -1,25 +1,6 @@
+/*
 package be.ddd.infra.loader;
 
-import be.ddd.domain.entity.crawling.BeverageSize;
-import be.ddd.domain.entity.crawling.CafeBeverage;
-import be.ddd.domain.entity.member.Member;
-import be.ddd.domain.entity.member.intake.IntakeHistory;
-import be.ddd.domain.exception.CafeBeverageNotFoundException;
-import be.ddd.domain.exception.MemberNotFoundException;
-import be.ddd.domain.repo.CafeBeverageRepository;
-import be.ddd.domain.repo.IntakeHistoryRepository;
-import be.ddd.domain.repo.MemberRepository;
-import java.time.LocalDateTime;
-import java.time.Month;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
-import lombok.RequiredArgsConstructor;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
@@ -84,3 +65,4 @@ public class IntakeHistoryDummyInitializer {
         System.out.println("✅ 7월 더미 음료 섭취 기록 생성 완료");
     }
 }
+*/

@@ -7,12 +7,12 @@ import java.util.Map;
 import java.util.UUID;
 
 public interface IntakeHistoryRepositoryCustom {
-    List<IntakeRecordDto> findByMemberIdAndDate(Long memberId, LocalDateTime intakeTime);
+    List<IntakeRecordDto> findByMemberIdAndDate(String providerId, LocalDateTime intakeTime);
 
     List<IntakeRecordDto> findByMemberIdAndDateBetween(
-            Long memberId, LocalDateTime startDate, LocalDateTime endDate);
+            String providerId, LocalDateTime startDate, LocalDateTime endDate);
 
-    long deleteIntakeHistory(Long memberId, UUID productId, LocalDateTime intakeTime);
+    long deleteIntakeHistory(String providerId, UUID productId, LocalDateTime intakeTime);
 
-    Map<Long, Double> sumSugarByMemberIdsAndDate(List<Long> memberIds, LocalDateTime date);
+    Map<Long, Double> sumSugarByMemberIdsAndDate(List<String> providerIds, LocalDateTime date);
 }

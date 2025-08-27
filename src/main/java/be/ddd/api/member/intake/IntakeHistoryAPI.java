@@ -3,6 +3,7 @@ package be.ddd.api.member.intake;
 import be.ddd.api.dto.req.IntakeHistoryDeleteReqDto;
 import be.ddd.api.dto.req.IntakeRegistrationRequestDto;
 import be.ddd.api.dto.res.DailyIntakeDto;
+import be.ddd.api.security.custom.CurrentUser;
 import be.ddd.application.member.intake.IntakeHistoryCommandService;
 import be.ddd.application.member.intake.IntakeHistoryQueryService;
 import be.ddd.common.dto.ApiResponse;
@@ -12,7 +13,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -22,54 +22,56 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/intake-histories")
 @RequiredArgsConstructor
 @Validated
-@Log4j2
 public class IntakeHistoryAPI {
 
     private final IntakeHistoryCommandService intakeHistoryCommand;
     private final IntakeHistoryQueryService intakeHistoryQuery;
-    private final Long MEMBER_ID = 1L; // TODO: 추후 실제 회원 데이터로 변경
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<?> registerIntake(
+            @CurrentUser String providerId,
             @RequestBody @Valid IntakeRegistrationRequestDto requestDto) {
-        log.info("product Id :{}", requestDto.productId());
-        Long historyId =
-                intakeHistoryCommand.registerIntake(MEMBER_ID, requestDto, requestDto.size());
+        Long historyId = intakeHistoryCommand.registerIntake(providerId, requestDto);
         return ApiResponse.success(historyId);
     }
 
     @GetMapping("/daily")
     public ApiResponse<DailyIntakeDto> getDailyIntake(
+            @CurrentUser String providerId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) @NotFutureDate
                     LocalDateTime intakeTime) {
         DailyIntakeDto dailyIntake =
-                intakeHistoryQuery.getDailyIntakeHistory(MEMBER_ID, intakeTime);
+                intakeHistoryQuery.getDailyIntakeHistory(providerId, intakeTime);
         return ApiResponse.success(dailyIntake);
     }
 
     @GetMapping("/weekly")
     public ApiResponse<List<DailyIntakeDto>> getWeeklyIntake(
+            @CurrentUser String providerId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) @NotFutureDate
                     LocalDateTime dateInWeek) {
         List<DailyIntakeDto> weeklyIntake =
-                intakeHistoryQuery.getWeeklyIntakeHistory(MEMBER_ID, dateInWeek);
+                intakeHistoryQuery.getWeeklyIntakeHistory(providerId, dateInWeek);
         return ApiResponse.success(weeklyIntake);
     }
 
     @GetMapping("/monthly")
     public ApiResponse<List<DailyIntakeDto>> getMonthlyIntake(
+            @CurrentUser String providerId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @NotFutureDate
                     LocalDateTime dateInMonth) {
         List<DailyIntakeDto> monthlyIntake =
-                intakeHistoryQuery.getMonthlyIntakeHistory(MEMBER_ID, dateInMonth);
+                intakeHistoryQuery.getMonthlyIntakeHistory(providerId, dateInMonth);
         return ApiResponse.success(monthlyIntake);
     }
 
     @DeleteMapping("/{productId}")
     public ApiResponse<?> deleteMemberIntakeHistory(
-            @PathVariable("productId") UUID productId, @RequestBody IntakeHistoryDeleteReqDto req) {
-        intakeHistoryCommand.deleteIntakeHistory(MEMBER_ID, productId, req.intakeTime());
+            @CurrentUser String providerId,
+            @PathVariable("productId") UUID productId,
+            @RequestBody IntakeHistoryDeleteReqDto req) {
+        intakeHistoryCommand.deleteIntakeHistory(providerId, productId, req.intakeTime());
 
         return ApiResponse.success("deleted");
     }

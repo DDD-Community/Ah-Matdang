@@ -4,13 +4,16 @@ import be.ddd.api.dto.res.IntakeRecordDto;
 import be.ddd.api.dto.res.QIntakeRecordDto;
 import be.ddd.domain.entity.crawling.QBeverageSizeInfo;
 import be.ddd.domain.entity.member.intake.QIntakeHistory;
+import be.ddd.domain.exception.MemberNotFoundException;
 import be.ddd.domain.repo.IntakeHistoryRepositoryCustom;
+import be.ddd.domain.repo.MemberRepository;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -19,13 +22,21 @@ import org.springframework.stereotype.Repository;
 public class IntakeHistoryRepositoryImpl implements IntakeHistoryRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
+    private final MemberRepository memberRepository;
     private final QIntakeHistory intakeHistory = QIntakeHistory.intakeHistory;
     private final QBeverageSizeInfo beverageSizeInfo = QBeverageSizeInfo.beverageSizeInfo;
 
     @Override
-    public List<IntakeRecordDto> findByMemberIdAndDate(Long memberId, LocalDateTime intakeTime) {
+    public List<IntakeRecordDto> findByMemberIdAndDate(
+            String providerId, LocalDateTime intakeTime) {
         LocalDateTime startOfDay = intakeTime.toLocalDate().atStartOfDay();
         LocalDateTime endOfDay = intakeTime.toLocalDate().atTime(LocalTime.MAX);
+
+        Long memberId =
+                memberRepository
+                        .findByProviderId(providerId)
+                        .orElseThrow(MemberNotFoundException::new)
+                        .getId();
 
         return queryFactory
                 .select(
@@ -56,9 +67,15 @@ public class IntakeHistoryRepositoryImpl implements IntakeHistoryRepositoryCusto
 
     @Override
     public List<IntakeRecordDto> findByMemberIdAndDateBetween(
-            Long memberId, LocalDateTime startDate, LocalDateTime endDate) {
+            String providerId, LocalDateTime startDate, LocalDateTime endDate) {
         LocalDateTime startDateTime = startDate.toLocalDate().atStartOfDay();
         LocalDateTime endDateTime = endDate.toLocalDate().atTime(LocalTime.MAX);
+
+        Long memberId =
+                memberRepository
+                        .findByProviderId(providerId)
+                        .orElseThrow(MemberNotFoundException::new)
+                        .getId();
 
         return queryFactory
                 .select(
@@ -88,7 +105,13 @@ public class IntakeHistoryRepositoryImpl implements IntakeHistoryRepositoryCusto
     }
 
     @Override
-    public long deleteIntakeHistory(Long memberId, UUID productId, LocalDateTime intakeTime) {
+    public long deleteIntakeHistory(String providerId, UUID productId, LocalDateTime intakeTime) {
+        Long memberId =
+                memberRepository
+                        .findByProviderId(providerId)
+                        .orElseThrow(MemberNotFoundException::new)
+                        .getId();
+
         return queryFactory
                 .delete(intakeHistory)
                 .where(
@@ -99,9 +122,15 @@ public class IntakeHistoryRepositoryImpl implements IntakeHistoryRepositoryCusto
     }
 
     @Override
-    public Map<Long, Double> sumSugarByMemberIdsAndDate(List<Long> memberIds, LocalDateTime date) {
+    public Map<Long, Double> sumSugarByMemberIdsAndDate(
+            List<String> providerIds, LocalDateTime date) {
         LocalDateTime startOfDay = date.toLocalDate().atStartOfDay();
         LocalDateTime endOfDay = date.toLocalDate().atTime(LocalTime.MAX);
+
+        List<Long> memberIds =
+                memberRepository.findByProviderIdIn(providerIds).stream()
+                        .map(member -> member.getId())
+                        .collect(Collectors.toList());
 
         return queryFactory
                 .select(
