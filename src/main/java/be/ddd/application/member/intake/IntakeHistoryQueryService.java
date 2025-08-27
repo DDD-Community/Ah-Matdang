@@ -5,9 +5,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface IntakeHistoryQueryService {
-    DailyIntakeDto getDailyIntakeHistory(Long memberId, LocalDateTime date);
+    DailyIntakeDto getDailyIntakeHistory(String providerId, LocalDateTime date);
 
-    List<DailyIntakeDto> getWeeklyIntakeHistory(Long memberId, LocalDateTime dateInWeek);
+    List<DailyIntakeDto> getWeeklyIntakeHistory(String providerId, LocalDateTime dateInWeek);
 
-    List<DailyIntakeDto> getMonthlyIntakeHistory(Long memberId, LocalDateTime dateInMonth);
+    List<DailyIntakeDto> getMonthlyIntakeHistory(String providerId, LocalDateTime dateInMonth);
 }

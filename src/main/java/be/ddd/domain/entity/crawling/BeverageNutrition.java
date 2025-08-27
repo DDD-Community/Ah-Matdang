@@ -1,6 +1,7 @@
 package be.ddd.domain.entity.crawling;
 
 import be.ddd.application.batch.dto.BeverageNutritionDto;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AccessLevel;
@@ -15,6 +16,7 @@ public class BeverageNutrition {
     @Column(name = "SERVING_KCAL", nullable = false)
     private Integer servingKcal; // 1회 제공량(kcal)
 
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
     @Column(name = "SATURATED_FAT_G", nullable = false)
     private Double saturatedFatG; // 포화지방(g)
 

@@ -2,6 +2,7 @@ package be.ddd.domain.repo;
 
 import be.ddd.domain.entity.member.Member;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,6 +18,8 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
     Optional<Member> findByProviderIdAndDeletedAtIsNull(String providerId);
 
     Optional<Member> findByProviderId(String providerId);
+
+    List<Member> findByProviderIdIn(Collection<String> providerIds);
 
     List<Member> findByDeletedAtIsNotNullAndDeletedAtLessThanEqual(LocalDate deleteDate);
 }

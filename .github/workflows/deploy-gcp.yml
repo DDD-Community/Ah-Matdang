@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  schedule:
+    # GitHub Actions는 UTC 기준. 화요일 18:00 UTC = 수요일 03:00 KST
+    - cron: '0 18 * * 2'
 
 env:
   PROJECT_ID: ${{secrets.GCP_PROJECT_ID }}
@@ -11,61 +14,48 @@ env:
   REPOSITORY: ${{secrets.GCP_REPOSITORY }}
   IMAGE_NAME: ${{secrets.GCP_IMAGE_NAME }}
   IMAGE_TAG: ${{ secrets.GCP_TAG }}
-
-  # VM 정보 (Terraform으로 생성된 값)
   VM_NAME: ${{secrets.VM_INSTANCE_NAME }}
   VM_ZONE: ${{secrets.VM_ZONE }}
-
-  # 컨테이너 이름
   CONTAINER_NAME: ${{secrets.CONTAINER_NAME }}
 
 jobs:
   build-and-push:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
-
       - name: Build with Gradle
         run: ./gradlew clean build -x test
-
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
-
       - name: Configure Docker for Artifact Registry
-        run: |
-          gcloud auth configure-docker asia-northeast3-docker.pkg.dev --quiet
-
+        run: gcloud auth configure-docker asia-northeast3-docker.pkg.dev --quiet
       - name: Build & Push Docker image
         run: |
           IMAGE_URI="${{ env.LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
           echo "▶ IMAGE_URI = $IMAGE_URI"
-
           docker build --platform linux/amd64 -t "$IMAGE_URI" .
-          docker push     "$IMAGE_URI"
+          docker push "$IMAGE_URI"
 
   deploy:
     name: Deploy to GCP VM
     needs: build-and-push
     runs-on: ubuntu-latest
-
+    if: github.event_name == 'push'
     steps:
       - name: Authenticate to GCP for Deploy
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
-
-      - name: SSH & Deploy
+      - name: SSH & Deploy (with 85% conditional prune)
         uses: google-github-actions/ssh-compute@v1
         with:
           project_id: ${{env.PROJECT_ID}}
@@ -73,18 +63,35 @@ jobs:
           instance_name: ${{ env.VM_NAME }}
           user: ubuntu
           ssh_private_key: ${{ secrets.GCP_VM_SSH_PRIVATE_KEY }}
-          command: >
-            set -e &&
-            gcloud auth configure-docker asia-northeast3-docker.pkg.dev --quiet &&
-            IMAGE_URI="${{ env.LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}" &&
-            docker stop ${{ env.CONTAINER_NAME }} 2>/dev/null || true &&
-            docker rm   ${{ env.CONTAINER_NAME }} 2>/dev/null || true &&
-            docker pull "$IMAGE_URI" &&
+          command: |
+            set -euo pipefail
+
+            REG="asia-northeast3-docker.pkg.dev"
+            IMAGE_URI="${{ env.LOCATION }}/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}"
+            APP="${{ env.CONTAINER_NAME }}"
+
+            gcloud auth configure-docker "$REG" --quiet
+
+            USED=$(df -P / | awk 'NR==2 {gsub("%","",$5); print $5}')
+            FREE_MB=$(df -Pm / | awk 'NR==2{print $4}')
+            echo "Disk used: ${USED}%, free: ${FREE_MB}MB"
+
+            if [ "$USED" -ge 85 ] || [ "$FREE_MB" -lt 1500 ]; then
+              echo "Disk high usage → light prune"
+              docker image prune -af --filter "until=168h" || true
+              docker builder prune -af || true
+            fi
+
+            docker pull "$IMAGE_URI"
+
+            docker stop "$APP" 2>/dev/null || true
+            docker rm   "$APP" 2>/dev/null || true
+
             docker run -d \
-              --name ${{ env.CONTAINER_NAME }} \
+              --name "$APP" \
               --restart unless-stopped \
               -p 8080:8080 \
-              -e JASYPT_ENCRYPTOR_PASSWORD="${{ secrets.JASYPT_PASSWORD }}" \
+              -e JASYPT_ENCRYPTOR_PASSWORD='${{ secrets.JASYPT_PASSWORD }}' \
               -e FIREBASE_SA_JSON_B64='${{ secrets.FCM_SERVICE_ACCOUNT_JSON_B64 }}' \
               -e AUTH0_CLIENT_ID='${{ secrets.AUTH0_CLIENT_ID }}' \
               -e AUTH0_CLIENT_SECRET='${{ secrets.AUTH0_CLIENT_SECRET }}' \
@@ -100,3 +107,28 @@ jobs:
                -X POST \
                -d '{"content":"서버 정상배포되었습니다 🎉"}' \
                ${{ secrets.DISCORD_SERVER_NOTIFY_WEBHOOK}}
+
+  weekly-prune:
+    name: Weekly prune on Wed 03:00 KST
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - name: SSH & Prune
+        uses: google-github-actions/ssh-compute@v1
+        with:
+          project_id: ${{env.PROJECT_ID}}
+          zone: ${{ env.VM_ZONE }}
+          instance_name: ${{ env.VM_NAME }}
+          user: ubuntu
+          ssh_private_key: ${{ secrets.GCP_VM_SSH_PRIVATE_KEY }}
+          command: |
+            set -euo pipefail
+            echo "Weekly prune start..."
+            docker image prune -af --filter "until=168h" || true
+            docker builder prune -af || true
+            sudo journalctl --vacuum-time=7d || true
+            echo "Weekly prune done."
