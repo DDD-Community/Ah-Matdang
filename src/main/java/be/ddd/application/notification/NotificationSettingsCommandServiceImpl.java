@@ -28,26 +28,18 @@ public class NotificationSettingsCommandServiceImpl implements NotificationSetti
                         .findByFakeIdAndDeletedAtIsNull(memberFakeId)
                         .orElseThrow(MemberNotFoundException::new);
 
-        //        NotificationSettings settings =
-        //                notificationSettingsRepository
-        //                        .findByMemberId(member.getId())
-        //                        .orElseThrow(
-        //                                () ->
-        //                                        new IllegalStateException(
-        //                                                "NotificationSettings not found for member
-        // "
-        //                                                        + memberFakeId));
-        if (member.getNotificationSettings() == null) {
-            NotificationSettings settings = new NotificationSettings(member);
+        NotificationSettings settings = member.getNotificationSettings();
+        if (settings == null) {
+            settings = new NotificationSettings(member);
             member.notificationSettings(settings);
-            return NotificationSettingsResponseDto.from(settings);
         }
-        /*settings.updateSettings(
-        dto.isEnabled(),
-        dto.remindersEnabled(),
-        dto.reminderTime(),
-        dto.riskWarningsEnabled(),
-        dto.newsUpdatesEnabled());*/
+
+        settings.updateSettings(
+                dto.isEnabled(),
+                dto.remindersEnabled(),
+                dto.reminderTime(),
+                dto.riskWarningsEnabled(),
+                dto.newsUpdatesEnabled());
 
         return NotificationSettingsResponseDto.from(member.getNotificationSettings());
     }

@@ -58,25 +58,48 @@ public class NotificationSettings extends BaseTimeEntity {
             Boolean newsUpdatesEnabled) {
         log.info("진짜중요! isEnabled:{}", isEnabled);
         if (isEnabled != null) {
-            this.isEnabled = isEnabled;
-            if (!this.isEnabled) {
-                log.info("도ㅒㅆ냐??????");
-                this.remindersEnabled = false;
-                this.riskWarningsEnabled = false;
-                this.newsUpdatesEnabled = false;
+            // isEnabled가 false에서 true로 변경될 때
+            if (!this.isEnabled && isEnabled) {
+                this.isEnabled = true;
+                this.remindersEnabled = true;
+                this.riskWarningsEnabled = true;
+                this.newsUpdatesEnabled = true;
+            } else {
+                this.isEnabled = isEnabled;
+                // isEnabled가 false로 변경될 때
+                if (!this.isEnabled) {
+                    log.info("도ㅒㅆ냐??????");
+                    this.remindersEnabled = false;
+                    this.riskWarningsEnabled = false;
+                    this.newsUpdatesEnabled = false;
+                } else { // isEnabled가 true일 때 개별 설정 적용
+                    if (remindersEnabled != null) {
+                        this.remindersEnabled = remindersEnabled;
+                    }
+                    if (riskWarningsEnabled != null) {
+                        this.riskWarningsEnabled = riskWarningsEnabled;
+                    }
+                    if (newsUpdatesEnabled != null) {
+                        this.newsUpdatesEnabled = newsUpdatesEnabled;
+                    }
+                }
+            }
+        } else { // isEnabled가 null이면 개별 설정만 적용
+            if (this.isEnabled) {
+                if (remindersEnabled != null) {
+                    this.remindersEnabled = remindersEnabled;
+                }
+                if (riskWarningsEnabled != null) {
+                    this.riskWarningsEnabled = riskWarningsEnabled;
+                }
+                if (newsUpdatesEnabled != null) {
+                    this.newsUpdatesEnabled = newsUpdatesEnabled;
+                }
             }
         }
-        if (remindersEnabled != null) {
-            this.remindersEnabled = remindersEnabled;
-        }
+
         if (reminderTime != null) {
             this.reminderTime = reminderTime;
-        }
-        if (riskWarningsEnabled != null) {
-            this.riskWarningsEnabled = riskWarningsEnabled;
-        }
-        if (newsUpdatesEnabled != null) {
-            this.newsUpdatesEnabled = newsUpdatesEnabled;
         }
     }
 }
