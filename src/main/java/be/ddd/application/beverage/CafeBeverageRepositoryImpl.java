@@ -73,7 +73,9 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
                         beverage.id.gt(cursor),
                         beverageQueryPredicates.brandEq(brand),
                         beverageQueryPredicates.sugarLevelEq(sugarLevel),
-                        beverageQueryPredicates.onlyLiked(onlyLiked))
+                        beverageQueryPredicates.onlyLiked(onlyLiked),
+                        beverageSizeInfo.sizeType.eq(
+                                be.ddd.domain.entity.crawling.BeverageSize.TALL))
                 .orderBy(beverage.id.asc())
                 .limit(limit)
                 .fetch();
@@ -118,7 +120,9 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
                 .where(
                         beverageQueryPredicates.keywordSearch(keyword),
                         beverageQueryPredicates.sugarLevelEq(sugar),
-                        beverageQueryPredicates.onlyLiked(onlyLiked))
+                        beverageQueryPredicates.onlyLiked(onlyLiked),
+                        beverageSizeInfo.sizeType.eq(
+                                be.ddd.domain.entity.crawling.BeverageSize.TALL))
                 .orderBy(likeOrder.desc(), relevance.desc())
                 .fetch();
     }
