@@ -36,7 +36,7 @@ public class NotificationSettings extends BaseTimeEntity {
     private boolean remindersEnabled = true;
 
     @Column(name = "reminder_time", nullable = false)
-    private LocalTime reminderTime = LocalTime.of(21, 0);
+    private LocalTime reminderTime = LocalTime.of(15, 0);
 
     @Column(name = "risk_warnings_enabled", nullable = false)
     @ColumnDefault("true")
