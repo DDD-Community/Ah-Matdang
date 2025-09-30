@@ -5,7 +5,7 @@ spring:
   flyway:
     baseline-on-migrate: true
     enabled: true
-    url: ENC(hhxDiYNTnUKTWu9azZTgz2PKIUpIbDdR5JL/hiauZkriqOv6wPFKW7Q6Kk9Qi2AawVpkXnlxEconhOmZljKtl+tt/VJu7Q88/OcZUQ7QiAYOtYEkldWhqQxiChkaTP9w9T447jpec7Y86QEuxFLRx5pwhuuV4pdtbpUBmLl4r7tM16Z9qhTTXmuvKvfjQD6Z)
+    url: ENC(N9ZF9W2LrxymS/eFSbWzvN0wVCYmT/DlNvyr4szG683Ro821j9AXtntQG6EhzOw+GPdBVeBzFd8Dck9DrNit+VlWAJtqi8GmyCUXI7JbjFwwB45Nibrz/oZ8qX1TwLt1C6CdGKM1zo5jEl2vuuZFtIMKm+OyoYJ9qHC/5DAItpLfUJyYl8svv1NKWf/vDMZy)
     user: ENC(EUc5lpk9Sn77473PV6hm7Q==)
     password: ENC(7pCO5qSn9x5VNppvYxsJUrZLTfWiNggsIrFpPpTSjyI=)
     locations: classpath:/db/migration
@@ -14,7 +14,7 @@ spring:
       host: localhost
       port: 6379
   datasource:
-    url: ENC(ckV/BSjYBlyA+3GzkRZaC9mKwgNMBDRxcdhjMcAnoO9UhB4sAL/3N+xL+5t36riF/OlMASoArRcM2qGFUkdS6yLgTUP163/WmM9zDP1WNDX2woyZkXWmVTkvSlQF/SehFEp0DRDwi+WJFbiuJqG2NqbH3x1yLPmZubRDasTBBvtEk/GtQayw+tNI9RciRHVR)
+    url: ENC(N9ZF9W2LrxymS/eFSbWzvN0wVCYmT/DlNvyr4szG683Ro821j9AXtntQG6EhzOw+GPdBVeBzFd8Dck9DrNit+VlWAJtqi8GmyCUXI7JbjFwwB45Nibrz/oZ8qX1TwLt1C6CdGKM1zo5jEl2vuuZFtIMKm+OyoYJ9qHC/5DAItpLfUJyYl8svv1NKWf/vDMZy)
     username: ENC(EUc5lpk9Sn77473PV6hm7Q==)
     password: ENC(7pCO5qSn9x5VNppvYxsJUrZLTfWiNggsIrFpPpTSjyI=)
     driver-class-name: com.mysql.cj.jdbc.Driver
