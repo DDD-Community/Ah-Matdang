@@ -3,13 +3,22 @@ provider "google" {
   region  = var.gcp_region
 }
 
+terraform {
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+    }
+  }
+}
+
 resource "google_project_service" "apis" {
   for_each = toset([
     "compute.googleapis.com",
     "sqladmin.googleapis.com",
     "artifactregistry.googleapis.com",
     "iam.googleapis.com",
-    "servicenetworking.googleapis.com"
+    "servicenetworking.googleapis.com",
+    "dns.googleapis.com"
   ])
   project                    = var.gcp_project_id
   service                    = each.key
@@ -20,6 +29,7 @@ resource "google_compute_network" "vpc_network" {
   name                    = "terraform-network"
   auto_create_subnetworks = true
   project                 = var.gcp_project_id
+  depends_on = [google_project_service.apis]
 }
 
 # 비공개 서비스 연결을 위한 IP 주소 범위 예약
