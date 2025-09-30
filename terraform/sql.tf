@@ -6,6 +6,7 @@ resource "google_sql_database_instance" "main_db" {
   database_version = "MYSQL_8_0"
   region           = var.gcp_region
   project          = var.gcp_project_id
+  deletion_protection = false
 
   settings {
     tier = "db-f1-micro"
@@ -14,6 +15,7 @@ resource "google_sql_database_instance" "main_db" {
       private_network = google_compute_network.vpc_network.id
     }
   }
+
   depends_on = [google_service_networking_connection.private_vpc_connection]
 }
 
