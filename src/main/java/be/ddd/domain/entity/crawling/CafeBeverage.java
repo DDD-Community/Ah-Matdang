@@ -86,10 +86,15 @@ public class CafeBeverage extends BaseTimeEntity {
                     .filter(s -> s.getSizeType() == BeverageSize.TALL)
                     .findFirst()
                     .ifPresent(
-                            sizeInfo ->
+                            sizeInfo -> {
+                                BeverageNutrition nutrition = sizeInfo.getBeverageNutrition();
+                                if (nutrition != null) {
                                     this.sugarLevel =
                                             SugarLevel.valueOfSugar(
-                                                    sizeInfo.getBeverageNutrition().getSugarG()));
+                                                    nutrition.getSugarG(),
+                                                    sizeInfo.getSizeType().getVolume());
+                                }
+                            });
         }
     }
 
@@ -127,10 +132,15 @@ public class CafeBeverage extends BaseTimeEntity {
                 .findFirst()
                 .or(() -> beverage.sizes.stream().findFirst())
                 .ifPresent(
-                        sizeInfo ->
+                        sizeInfo -> {
+                            BeverageNutrition nutrition = sizeInfo.getBeverageNutrition();
+                            if (nutrition != null) {
                                 beverage.sugarLevel =
                                         SugarLevel.valueOfSugar(
-                                                sizeInfo.getBeverageNutrition().getSugarG()));
+                                                nutrition.getSugarG(),
+                                                sizeInfo.getSizeType().getVolume());
+                            }
+                        });
 
         return beverage;
     }
