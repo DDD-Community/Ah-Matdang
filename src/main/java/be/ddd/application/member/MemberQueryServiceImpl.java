@@ -33,11 +33,4 @@ public class MemberQueryServiceImpl implements MemberQueryService {
                         .orElseThrow(MemberNotFoundException::new);
         return member.getId();
     }
-
-    @Override
-    public Member getMemberByFakeId(UUID fakeId) {
-        return memberRepository
-                .findByFakeIdAndDeletedAtIsNull(fakeId)
-                .orElseThrow(MemberNotFoundException::new);
-    }
 }
