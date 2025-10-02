@@ -1,6 +1,5 @@
 package be.ddd.domain.entity.crawling;
 
-import java.util.Arrays;
 import java.util.Optional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -8,21 +7,26 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum SugarLevel {
-    ZERO("무당", 0),
-    LOW("저당", 20),
-    HIGH("고당", Integer.MAX_VALUE);
+    ZERO("무당"),
+    LOW("저당"),
+    HIGH("고당");
 
     private final String description;
-    private final int maxSugarGrams;
 
-    public static SugarLevel valueOfSugar(Integer sugar) {
-        if (sugar == null) {
+    public static SugarLevel valueOfSugar(Integer sugarG, int volume) {
+        if (sugarG == null) {
             return HIGH;
         }
-        return Arrays.stream(values())
-                .filter(level -> sugar <= level.maxSugarGrams)
-                .findFirst()
-                .orElse(HIGH);
+        if (sugarG == 0) {
+            return ZERO;
+        }
+        if (volume > 0) {
+            double sugarPer100ml = (double) sugarG / volume * 100;
+            if (sugarPer100ml <= 2.5) {
+                return LOW;
+            }
+        }
+        return HIGH;
     }
 
     public static Optional<SugarLevel> fromParam(String param) {
