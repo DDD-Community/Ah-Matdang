@@ -7,6 +7,8 @@ import be.ddd.api.dto.res.MemberModifyDetailsDto;
 import be.ddd.api.dto.res.MemberRegistrationDetailsDto;
 import be.ddd.application.member.MemberCommandService;
 import be.ddd.application.member.MemberQueryService;
+import be.ddd.application.member.SugarRecommendationService;
+import be.ddd.application.member.dto.res.RecommendedSugar;
 import be.ddd.common.dto.ApiResponse;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 public class MemberProfileAPI {
     private final MemberCommandService memberCommandService;
     private final MemberQueryService memberQueryService;
+    private final SugarRecommendationService sugarRecommendationService;
 
     @PostMapping("/{fakeId}")
     @ResponseStatus(HttpStatus.CREATED)
@@ -45,5 +48,13 @@ public class MemberProfileAPI {
         MemberDetailsDto memberDetailsDto = memberQueryService.checkMemberProfile(fakeId);
 
         return ApiResponse.success(memberDetailsDto);
+    }
+
+    @GetMapping("/{fakeId}/sugar")
+    public ApiResponse<RecommendedSugar> getSugarRecommendation(
+            @PathVariable("fakeId") UUID fakeId) {
+        RecommendedSugar res =
+                sugarRecommendationService.calculate(memberQueryService.getMemberByFakeId(fakeId));
+        return ApiResponse.success(res);
     }
 }

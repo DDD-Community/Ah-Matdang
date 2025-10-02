@@ -35,6 +35,8 @@ public class SecurityConfig {
                                 auth.requestMatchers(HttpMethod.OPTIONS, "/**")
                                         .permitAll()
                                         .requestMatchers(
+                                                "/admin/**",
+                                                "/api/admin/**",
                                                 "/ping",
                                                 "/api/login/**",
                                                 "/api/auth/**",

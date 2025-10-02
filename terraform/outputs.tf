@@ -15,7 +15,7 @@ output "vm_zone" {
 }
 
 output "db_connection_name" {
-  description = "Cloud SQL instance connection name."
+  description = "Cloud SQL DB 연결 이름"
   value       = google_sql_database_instance.main_db.connection_name
 }
 

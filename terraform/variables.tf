@@ -1,6 +1,7 @@
 variable "gcp_project_id" {
   description = "The GCP project ID to deploy resources into."
   type        = string
+  default     = "able-pottery-472614-c6"
 }
 
 variable "gcp_region" {

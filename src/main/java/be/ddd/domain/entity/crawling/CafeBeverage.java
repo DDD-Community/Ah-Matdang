@@ -86,10 +86,15 @@ public class CafeBeverage extends BaseTimeEntity {
                     .filter(s -> s.getSizeType() == BeverageSize.TALL)
                     .findFirst()
                     .ifPresent(
-                            sizeInfo ->
+                            sizeInfo -> {
+                                BeverageNutrition nutrition = sizeInfo.getBeverageNutrition();
+                                if (nutrition != null) {
                                     this.sugarLevel =
                                             SugarLevel.valueOfSugar(
-                                                    sizeInfo.getBeverageNutrition().getSugarG()));
+                                                    nutrition.getSugarG(),
+                                                    sizeInfo.getSizeType().getVolume());
+                                }
+                            });
         }
     }
 
@@ -97,6 +102,10 @@ public class CafeBeverage extends BaseTimeEntity {
     public void addSizeInfo(BeverageSizeInfo sizeInfo) {
         this.sizes.add(sizeInfo);
         sizeInfo.setCafeBeverage(this);
+    }
+
+    public void setProductId(UUID productId) {
+        this.productId = productId;
     }
 
     public static CafeBeverage of(
@@ -127,10 +136,15 @@ public class CafeBeverage extends BaseTimeEntity {
                 .findFirst()
                 .or(() -> beverage.sizes.stream().findFirst())
                 .ifPresent(
-                        sizeInfo ->
+                        sizeInfo -> {
+                            BeverageNutrition nutrition = sizeInfo.getBeverageNutrition();
+                            if (nutrition != null) {
                                 beverage.sugarLevel =
                                         SugarLevel.valueOfSugar(
-                                                sizeInfo.getBeverageNutrition().getSugarG()));
+                                                nutrition.getSugarG(),
+                                                sizeInfo.getSizeType().getVolume());
+                            }
+                        });
 
         return beverage;
     }
@@ -150,5 +164,11 @@ public class CafeBeverage extends BaseTimeEntity {
         this.imgUrl = imgUrl;
         this.beverageType = beverageType;
         this.sugarLevel = sugarLevel;
+    }
+
+    public CafeBeverage(String name, String imgUrl, CafeStore cafeStore) {
+        this.name = name;
+        this.imgUrl = imgUrl;
+        this.cafeStore = cafeStore;
     }
 }

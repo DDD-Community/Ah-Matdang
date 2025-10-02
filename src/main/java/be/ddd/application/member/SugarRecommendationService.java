@@ -36,7 +36,7 @@ public class SugarRecommendationService {
 
     private double calculateBMR(int age, Integer weight, Gender gender) {
         double w = (double) weight;
-        if (age >= 18 && age <= 30) {
+        if (age >= 14 && age <= 30) {
             return gender == Gender.MALE ? (15.3 * w + 679) : (14.7 * w + 496);
         } else if (age > 30 && age <= 60) {
             return gender == Gender.MALE ? (11.6 * w + 879) : (8.7 * w + 829);

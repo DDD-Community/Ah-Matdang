@@ -3,6 +3,7 @@ resource "google_compute_address" "static_ip" {
   name    = "${var.app_name}-static-ip"
   region  = var.gcp_region
   project = var.gcp_project_id
+  depends_on = [google_project_service.apis]
 }
 
 ### Compute Engine VM 인스턴스 (Ubuntu + Docker 설치)
@@ -39,7 +40,18 @@ resource "google_compute_instance" "app_server" {
     apt-get install -y docker.io
     systemctl enable docker
     systemctl start docker
+    usermod -aG docker ubuntu
   EOT
 
   depends_on = [google_project_service.apis]
+}
+
+### Instance Group
+resource "google_compute_instance_group" "instance_group" {
+  name    = "${var.app_name}-instance-group"
+  zone    = "${var.gcp_region}-a"
+  project = var.gcp_project_id
+  instances = [
+    google_compute_instance.app_server.id
+  ]
 }
