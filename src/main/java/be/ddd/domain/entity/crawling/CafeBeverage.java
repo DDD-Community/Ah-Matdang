@@ -104,6 +104,10 @@ public class CafeBeverage extends BaseTimeEntity {
         sizeInfo.setCafeBeverage(this);
     }
 
+    public void setProductId(UUID productId) {
+        this.productId = productId;
+    }
+
     public static CafeBeverage of(
             String name,
             UUID productId,
@@ -160,5 +164,11 @@ public class CafeBeverage extends BaseTimeEntity {
         this.imgUrl = imgUrl;
         this.beverageType = beverageType;
         this.sugarLevel = sugarLevel;
+    }
+
+    public CafeBeverage(String name, String imgUrl, CafeStore cafeStore) {
+        this.name = name;
+        this.imgUrl = imgUrl;
+        this.cafeStore = cafeStore;
     }
 }

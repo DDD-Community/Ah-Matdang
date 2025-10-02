@@ -90,6 +90,9 @@ dependencies {
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
 
     implementation("com.google.firebase:firebase-admin:9.5.0")
+
+    // Thymeleaf for Spring MVC
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 }
 
 def querydslSrcDir = 'build/generated/querydsl'
