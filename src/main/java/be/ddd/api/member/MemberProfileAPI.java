@@ -5,6 +5,8 @@ import be.ddd.api.dto.req.MemberProfileRegistrationDto;
 import be.ddd.api.dto.res.MemberDetailsDto;
 import be.ddd.api.dto.res.MemberModifyDetailsDto;
 import be.ddd.api.dto.res.MemberRegistrationDetailsDto;
+import be.ddd.api.member.dto.req.FCMTokenUpdateRequest;
+import be.ddd.api.security.custom.CurrentUser;
 import be.ddd.application.member.MemberCommandService;
 import be.ddd.application.member.MemberQueryService;
 import be.ddd.application.member.SugarRecommendationService;
@@ -41,6 +43,16 @@ public class MemberProfileAPI {
         MemberModifyDetailsDto res = memberCommandService.modifyMemberProfile(fakeId, req);
 
         return ApiResponse.success(res);
+    }
+
+    @PatchMapping("/{fakeId}/fcm-token")
+    public ApiResponse<?> updateFCMToken(
+            @PathVariable("fakeId") UUID fakeId,
+            @RequestBody FCMTokenUpdateRequest request,
+            @CurrentUser String providerId) {
+        Long memberId = memberQueryService.getMemberIdByProviderId(providerId);
+        memberCommandService.updateFCMToken(memberId, request.getFcmToken());
+        return ApiResponse.success(null);
     }
 
     @GetMapping("/{fakeId}")
