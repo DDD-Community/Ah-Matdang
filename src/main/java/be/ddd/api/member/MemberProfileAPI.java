@@ -52,7 +52,7 @@ public class MemberProfileAPI {
             @CurrentUser String providerId) {
         Long memberId = memberQueryService.getMemberIdByProviderId(providerId);
         memberCommandService.updateFCMToken(memberId, request.getFcmToken());
-        return ApiResponse.success("FCM token updated successfully.");
+        return ApiResponse.success(null);
     }
 
     @GetMapping("/{fakeId}")
