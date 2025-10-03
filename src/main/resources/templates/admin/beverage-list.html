@@ -1,9 +1,24 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>음료 관리 - 목록</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:inline="javascript">
+        const beverageSizeData = /*[[${sizes}]]*/;
+        const cafeBrandData = /*[[${brands}]]*/;
+
+        const beverageSizeMap = {};
+        beverageSizeData.forEach(size => {
+            beverageSizeMap[size.name] = size.displayName;
+        });
+
+        const cafeBrandMap = {};
+        cafeBrandData.forEach(brand => {
+            cafeBrandMap[brand.name] = brand.displayName;
+        });
+    </script>
 </head>
 <body>
 <div class="container mt-5">
@@ -11,6 +26,23 @@
         <h2>음료 목록</h2>
         <a href="/admin/beverages/add" class="btn btn-primary">새 음료 추가</a>
     </div>
+
+    <!-- 필터 및 검색 폼 -->
+    <form id="filter-form" class="row g-3 mb-4">
+        <div class="col-md-4">
+            <select id="brand-filter" class="form-select">
+                <option value="" selected>모든 브랜드</option>
+                <option th:each="brand : ${brands}" th:value="${brand.name}" th:text="${brand.displayName}"></option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <input type="search" id="keyword-search" class="form-control" placeholder="음료 이름으로 검색...">
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-success w-100">검색</button>
+        </div>
+    </form>
+
     <table class="table table-hover">
         <thead>
         <tr>

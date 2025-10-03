@@ -40,7 +40,9 @@ public class SecurityConfig {
                                                 "/ping",
                                                 "/api/login/**",
                                                 "/api/auth/**",
-                                                "/api/health")
+                                                "/api/health",
+                                                "/js/**",
+                                                "/*.ico")
                                         .permitAll()
                                         .anyRequest()
                                         .authenticated())

@@ -3,6 +3,7 @@ package be.ddd.domain.repo;
 import be.ddd.api.dto.res.BeverageCountDto;
 import be.ddd.application.beverage.dto.BeverageSearchDto;
 import be.ddd.application.beverage.dto.CafeBeveragePageDto;
+import be.ddd.domain.entity.crawling.CafeBeverage;
 import be.ddd.domain.entity.crawling.CafeBrand;
 import be.ddd.domain.entity.crawling.SugarLevel;
 import jakarta.annotation.Nullable;
@@ -10,6 +11,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CafeBeverageRepositoryCustom {
+    List<CafeBeverage> findBeverages(@Nullable CafeBrand brand, @Nullable String keyword);
+
     List<CafeBeveragePageDto> findWithCursor(
             Long cursor,
             int limit,

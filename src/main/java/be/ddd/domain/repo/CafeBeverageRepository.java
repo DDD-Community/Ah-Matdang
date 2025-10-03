@@ -8,13 +8,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-public interface CafeBeverageRepository extends JpaRepository<CafeBeverage, Long> {
+public interface CafeBeverageRepository
+        extends JpaRepository<CafeBeverage, Long>, CafeBeverageRepositoryCustom {
     @Query("SELECT cb FROM CafeBeverage cb JOIN FETCH cb.cafeStore cs JOIN FETCH cb.sizes s")
     List<CafeBeverage> findAllWithDetails();
 
     List<CafeBeverage> findAllByName(String name);
-
-    //    <S extends CafeBeverage> void saveAll(Iterable<S> entities);
 
     List<CafeBeverage> findByIdGreaterThanOrderByIdAsc(Long cursor, Pageable pageable);
 
