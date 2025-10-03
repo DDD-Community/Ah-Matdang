@@ -9,14 +9,14 @@ import lombok.Getter;
 public class BeverageDetailResponseDto {
     private final Long id;
     private final String name;
-    private final String brand;
+    private final be.ddd.domain.entity.crawling.CafeBrand brand;
     private final String imageUrl;
     private final List<BeverageSizeInfoResponseDto> sizes;
 
     public BeverageDetailResponseDto(CafeBeverage beverage) {
         this.id = beverage.getId();
         this.name = beverage.getName();
-        this.brand = beverage.getCafeStore().getCafeBrand().getDisplayName();
+        this.brand = beverage.getCafeStore().getCafeBrand();
         this.imageUrl = beverage.getImgUrl();
         this.sizes =
                 beverage.getSizes().stream()

@@ -8,10 +8,7 @@ import be.ddd.application.beverage.dto.BeverageSearchDto;
 import be.ddd.application.beverage.dto.CafeBeveragePageDto;
 import be.ddd.application.beverage.dto.CafeStoreDto;
 import be.ddd.application.beverage.dto.QBeverageSearchDto;
-import be.ddd.domain.entity.crawling.CafeBrand;
-import be.ddd.domain.entity.crawling.QBeverageSizeInfo;
-import be.ddd.domain.entity.crawling.QCafeBeverage;
-import be.ddd.domain.entity.crawling.SugarLevel;
+import be.ddd.domain.entity.crawling.*;
 import be.ddd.domain.entity.member.QMemberBeverageLike;
 import be.ddd.domain.repo.CafeBeverageRepositoryCustom;
 import com.querydsl.core.types.Projections;
@@ -232,5 +229,18 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
                                 .eq(memberBeverageLike.beverage.id)
                                 .and(memberBeverageLike.member.id.eq(memberId)))
                 .fetchOne();
+    }
+
+    @Override
+    public List<CafeBeverage> findBeverages(CafeBrand brand, String keyword) {
+        return queryFactory
+                .selectFrom(beverage)
+                .leftJoin(beverage.sizes, beverageSizeInfo)
+                .fetchJoin()
+                .where(
+                        beverageQueryPredicates.brandEq(brand),
+                        beverageQueryPredicates.keywordSearch(keyword))
+                .distinct()
+                .fetch();
     }
 }

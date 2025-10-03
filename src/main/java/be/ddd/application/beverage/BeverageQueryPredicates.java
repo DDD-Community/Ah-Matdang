@@ -7,7 +7,6 @@ import be.ddd.domain.entity.crawling.SugarLevel;
 import be.ddd.domain.entity.member.QMemberBeverageLike;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
 import jakarta.annotation.Nullable;
 import org.springframework.stereotype.Component;
@@ -73,12 +72,6 @@ public class BeverageQueryPredicates {
         if (!StringUtils.hasText(keyword)) {
             return null;
         }
-        String booleanWildcard = "+" + keyword.trim() + "*";
-        return Expressions.numberTemplate(
-                        Double.class,
-                        "fulltext_match({0}, {1})",
-                        beverage.name,
-                        Expressions.constant(booleanWildcard))
-                .gt(0);
+        return beverage.name.containsIgnoreCase(keyword);
     }
 }

@@ -14,4 +14,6 @@ public interface MemberCommandService {
             UUID fakeId, MemberProfileModifyDto memberProfileModifyDto);
 
     void withdrawMember(UUID fakeId);
+
+    void updateFCMToken(Long memberId, String fcmToken);
 }

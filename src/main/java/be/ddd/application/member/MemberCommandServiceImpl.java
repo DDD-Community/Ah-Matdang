@@ -87,6 +87,14 @@ public class MemberCommandServiceImpl implements MemberCommandService {
         memberRepository.save(member);
     }
 
+    @Override
+    public void updateFCMToken(Long memberId, String fcmToken) {
+        Member member =
+                memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        member.updateDeviceToken(fcmToken);
+        memberRepository.save(member);
+    }
+
     private RecommendedSugar updateSugarRecommendation(Member member) {
         RecommendedSugar baseRecommendation = sugarRecommendationService.calculate(member);
         MemberHealthMetric healthMetric = member.getMemberHealthMetric();
