@@ -3,6 +3,7 @@ package be.ddd.domain.repo;
 import be.ddd.api.dto.res.BeverageCountDto;
 import be.ddd.application.beverage.dto.BeverageSearchDto;
 import be.ddd.application.beverage.dto.CafeBeveragePageDto;
+import be.ddd.domain.entity.crawling.BeverageSize;
 import be.ddd.domain.entity.crawling.CafeBeverage;
 import be.ddd.domain.entity.crawling.CafeBrand;
 import be.ddd.domain.entity.crawling.SugarLevel;
@@ -19,7 +20,8 @@ public interface CafeBeverageRepositoryCustom {
             @Nullable CafeBrand brand,
             @Nullable SugarLevel sugarLevel,
             Long memberId,
-            @Nullable Boolean onlyLiked);
+            @Nullable Boolean onlyLiked,
+            Optional<BeverageSize> preferredSize);
 
     BeverageCountDto countSugarLevelByBrand(@Nullable CafeBrand brandFilter, Long memberId);
 

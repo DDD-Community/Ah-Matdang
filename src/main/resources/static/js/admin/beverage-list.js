@@ -51,6 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                     ${beverage.sizes.length > 0 ? beverage.sizes.map(size => `
                                         <div class="mb-2">
                                             <strong>${beverageSizeMap[size.size]}</strong>: 
+                                            ${size.nutrition.servingMl ? `용량 ${size.nutrition.servingMl}ml, ` : ''}
                                             칼로리 ${size.nutrition.servingKcal}kcal, 
                                             당류 ${size.nutrition.sugarG}g, 
                                             단백질 ${size.nutrition.proteinG}g, 

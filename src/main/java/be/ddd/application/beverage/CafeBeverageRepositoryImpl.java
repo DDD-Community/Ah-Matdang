@@ -41,10 +41,14 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
     public List<CafeBeveragePageDto> findWithCursor(
             Long cursor,
             int limit,
-            CafeBrand brand,
-            SugarLevel sugarLevel,
+            @Nullable CafeBrand brand,
+            @Nullable SugarLevel sugarLevel,
             Long memberId,
-            Boolean onlyLiked) {
+            @Nullable Boolean onlyLiked,
+            Optional<BeverageSize> preferredSize) {
+
+        BooleanExpression sizeTypeCondition =
+                preferredSize.map(beverageSizeInfo.sizeType::eq).orElse(null);
 
         return queryFactory
                 .select(
@@ -71,8 +75,7 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
                         beverageQueryPredicates.brandEq(brand),
                         beverageQueryPredicates.sugarLevelEq(sugarLevel),
                         beverageQueryPredicates.onlyLiked(onlyLiked),
-                        beverageSizeInfo.sizeType.eq(
-                                be.ddd.domain.entity.crawling.BeverageSize.TALL))
+                        sizeTypeCondition)
                 .orderBy(beverage.id.asc())
                 .limit(limit)
                 .fetch();
@@ -232,7 +235,7 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
     }
 
     @Override
-    public List<CafeBeverage> findBeverages(CafeBrand brand, String keyword) {
+    public List<CafeBeverage> findBeverages(@Nullable CafeBrand brand, @Nullable String keyword) {
         return queryFactory
                 .selectFrom(beverage)
                 .leftJoin(beverage.sizes, beverageSizeInfo)

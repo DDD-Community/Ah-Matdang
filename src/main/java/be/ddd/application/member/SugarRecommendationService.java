@@ -1,9 +1,11 @@
 package be.ddd.application.member;
 
+import be.ddd.application.member.dto.res.AllDifficultyRecommendedSugars;
 import be.ddd.application.member.dto.res.RecommendedSugar;
 import be.ddd.domain.entity.member.Gender;
 import be.ddd.domain.entity.member.Member;
 import be.ddd.domain.entity.member.MemberHealthMetric;
+import be.ddd.domain.entity.member.SugarRecommendationDifficulty;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -32,6 +34,52 @@ public class SugarRecommendationService {
         int sugarIdealG = (int) Math.round(sugarIdealGDouble);
 
         return new RecommendedSugar(sugarMaxG, sugarIdealG);
+    }
+
+    public AllDifficultyRecommendedSugars calculateAllDifficulties(Member member) {
+        RecommendedSugar baseRecommendation = calculate(member);
+
+        int baseSugarMaxG = baseRecommendation.sugarMaxG();
+        int baseSugarIdealG = baseRecommendation.sugarIdealG();
+
+        RecommendedSugar easy =
+                new RecommendedSugar(
+                        (int)
+                                Math.round(
+                                        baseSugarMaxG
+                                                * SugarRecommendationDifficulty.EASY
+                                                        .getMultiplier()),
+                        (int)
+                                Math.round(
+                                        baseSugarIdealG
+                                                * SugarRecommendationDifficulty.EASY
+                                                        .getMultiplier()));
+        RecommendedSugar normal =
+                new RecommendedSugar(
+                        (int)
+                                Math.round(
+                                        baseSugarMaxG
+                                                * SugarRecommendationDifficulty.NORMAL
+                                                        .getMultiplier()),
+                        (int)
+                                Math.round(
+                                        baseSugarIdealG
+                                                * SugarRecommendationDifficulty.NORMAL
+                                                        .getMultiplier()));
+        RecommendedSugar hard =
+                new RecommendedSugar(
+                        (int)
+                                Math.round(
+                                        baseSugarMaxG
+                                                * SugarRecommendationDifficulty.HARD
+                                                        .getMultiplier()),
+                        (int)
+                                Math.round(
+                                        baseSugarIdealG
+                                                * SugarRecommendationDifficulty.HARD
+                                                        .getMultiplier()));
+
+        return new AllDifficultyRecommendedSugars(easy, normal, hard);
     }
 
     private double calculateBMR(int age, Integer weight, Gender gender) {

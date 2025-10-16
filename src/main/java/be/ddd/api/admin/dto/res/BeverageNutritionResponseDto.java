@@ -5,6 +5,7 @@ import lombok.Getter;
 
 @Getter
 public class BeverageNutritionResponseDto {
+    private final Double servingMl;
     private final Integer servingKcal;
     private final Double saturatedFatG;
     private final Double proteinG;
@@ -13,6 +14,7 @@ public class BeverageNutritionResponseDto {
     private final Integer caffeineMg;
 
     public BeverageNutritionResponseDto(BeverageNutrition nutrition) {
+        this.servingMl = nutrition.getServingMl();
         this.servingKcal = nutrition.getServingKcal();
         this.saturatedFatG = nutrition.getSaturatedFatG();
         this.proteinG = nutrition.getProteinG();

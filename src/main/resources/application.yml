@@ -57,6 +57,7 @@ app:
   store-info:
     defaults:
       - starbucks
+      - megacoffee
       - test
   hmac:
     secret: ENC(jP8A2gyCQbR1P9wV6dG1lhRH3irrwURocEHzTek/ocM=)

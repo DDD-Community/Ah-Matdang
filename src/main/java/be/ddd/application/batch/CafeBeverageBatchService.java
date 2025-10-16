@@ -1,5 +1,6 @@
 package be.ddd.application.batch;
 
+import be.ddd.application.batch.dto.LambdaBeverageApiResponse;
 import be.ddd.application.batch.dto.LambdaBeverageDto;
 import be.ddd.domain.entity.crawling.CafeBeverage;
 import be.ddd.domain.entity.crawling.CafeBrand;
@@ -8,9 +9,9 @@ import be.ddd.domain.repo.CafeBeverageRepository;
 import be.ddd.domain.repo.CafeStoreRepository;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -24,22 +25,20 @@ public class CafeBeverageBatchService {
     private final CafeBeverageRepository repository;
     private final WebClient.Builder webClientBuilder;
 
-    private final String lambdaUrl =
-            "https://u6wvrcscqwe7rdbblr3xebajf40avfxz.lambda-url.ap-northeast-2.on.aws/";
+    private final String lambdaUrl = "http://localhost:8000/api/v1/beverages";
     private final CafeStoreRepository cafeStoreRepository;
 
     public List<LambdaBeverageDto> fetchAll() {
-        List<LambdaBeverageDto> beverages =
+        LambdaBeverageApiResponse apiResponse =
                 webClientBuilder
                         .baseUrl(lambdaUrl)
                         .build()
                         .get()
                         .retrieve()
-                        .bodyToMono(new ParameterizedTypeReference<List<LambdaBeverageDto>>() {})
+                        .bodyToMono(LambdaBeverageApiResponse.class)
                         .block();
-        log.info(
-                "[DEBUG] Fetched {} beverages from Lambda.",
-                beverages != null ? beverages.size() : 0);
+        List<LambdaBeverageDto> beverages = apiResponse != null ? apiResponse.getData() : List.of();
+        log.info("[DEBUG] Fetched {} beverages from Lambda.", beverages.size());
         return beverages;
     }
 
@@ -47,7 +46,7 @@ public class CafeBeverageBatchService {
         log.info(
                 "[DEBUG] Processing DTO for beverage: '{}'. Sizes received: {}",
                 dto.name(),
-                dto.beverageNutritions().keySet());
+                dto.beverageNutritions().stream().map(n -> n.size()).collect(Collectors.toList()));
         Objects.requireNonNull(dto.name(), "Beverage name required");
         List<CafeBeverage> existingBeverages = repository.findAllByName(dto.name());
         if (!existingBeverages.isEmpty()) {
@@ -56,11 +55,18 @@ public class CafeBeverageBatchService {
             existing.updateFromDto(dto);
             return existing;
         } else {
-            // TODO 카페 스토어 Batch 처리
+            final CafeBrand brand = CafeBrand.fromDisplayName(dto.brand());
+            if (brand == null) {
+                log.warn(
+                        "Unknown brand '{}' for new beverage '{}'. Skipping.",
+                        dto.brand(),
+                        dto.name());
+                return null;
+            }
             CafeStore cafeStore =
                     cafeStoreRepository
-                            .findByCafeBrand(CafeBrand.STARBUCKS)
-                            .orElseThrow(IllegalStateException::new);
+                            .findByCafeBrand(brand)
+                            .orElseGet(() -> cafeStoreRepository.save(CafeStore.of(brand)));
             return dto.toEntity(cafeStore);
         }
     }

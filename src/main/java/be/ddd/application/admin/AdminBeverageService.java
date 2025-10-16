@@ -37,6 +37,7 @@ public class AdminBeverageService {
                 if (sizeDto.servingKcal() != null) { // 칼로리 값이 있는 경우만 사이즈 정보로 추가
                     BeverageNutrition nutrition =
                             new BeverageNutrition(
+                                    (double) sizeDto.size().getVolume(),
                                     sizeDto.servingKcal(),
                                     sizeDto.saturatedFatG(),
                                     sizeDto.proteinG(),

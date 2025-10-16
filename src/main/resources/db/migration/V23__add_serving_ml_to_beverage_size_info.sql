@@ -1,0 +1,1 @@
+ALTER TABLE beverage_size_info ADD COLUMN serving_ml DOUBLE PRECISION NOT NULL DEFAULT 0.0;
