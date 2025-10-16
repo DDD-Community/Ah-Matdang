@@ -10,7 +10,7 @@ import be.ddd.api.security.custom.CurrentUser;
 import be.ddd.application.member.MemberCommandService;
 import be.ddd.application.member.MemberQueryService;
 import be.ddd.application.member.SugarRecommendationService;
-import be.ddd.application.member.dto.res.RecommendedSugar;
+import be.ddd.application.member.dto.res.AllDifficultyRecommendedSugars;
 import be.ddd.common.dto.ApiResponse;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -63,10 +63,11 @@ public class MemberProfileAPI {
     }
 
     @GetMapping("/{fakeId}/sugar")
-    public ApiResponse<RecommendedSugar> getSugarRecommendation(
+    public ApiResponse<AllDifficultyRecommendedSugars> getSugarRecommendation(
             @PathVariable("fakeId") UUID fakeId) {
-        RecommendedSugar res =
-                sugarRecommendationService.calculate(memberQueryService.getMemberByFakeId(fakeId));
+        AllDifficultyRecommendedSugars res =
+                sugarRecommendationService.calculateAllDifficulties(
+                        memberQueryService.getMemberByFakeId(fakeId));
         return ApiResponse.success(res);
     }
 }

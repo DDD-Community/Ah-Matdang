@@ -12,6 +12,7 @@ import lombok.ToString;
 @ToString
 public enum CafeBrand {
     STARBUCKS("starbucks"),
+    MEGA_COFFEE("megacoffee"),
     TEST("test");
 
     private static final Map<String, CafeBrand> BY_DISPLAY_NAME =
@@ -31,7 +32,12 @@ public enum CafeBrand {
         if (name == null) {
             return null;
         }
-        return BY_DISPLAY_NAME.get(name.toLowerCase());
+        String lowerCaseName = name.toLowerCase().replace("_", "");
+        // Handle Korean name for Mega Coffee
+        if ("메가커피".equals(lowerCaseName)) {
+            return MEGA_COFFEE;
+        }
+        return BY_DISPLAY_NAME.get(lowerCaseName);
     }
 
     public static Optional<CafeBrand> findByDisplayName(String name) {

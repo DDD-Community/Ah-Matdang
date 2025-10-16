@@ -13,6 +13,9 @@ import lombok.NoArgsConstructor;
 @Getter
 public class BeverageNutrition {
 
+    @Column(name = "SERVING_ML")
+    private Double servingMl; // 1회 제공량(ml)
+
     @Column(name = "SERVING_KCAL", nullable = false)
     private Integer servingKcal; // 1회 제공량(kcal)
 
@@ -34,6 +37,7 @@ public class BeverageNutrition {
 
     public static BeverageNutrition from(BeverageNutritionDto dto) {
         return new BeverageNutrition(
+                parseDouble(dto.servingMl()),
                 parseInt(dto.servingKcal()),
                 parseDouble(dto.saturatedFatG()),
                 parseDouble(dto.proteinG()),
@@ -65,12 +69,14 @@ public class BeverageNutrition {
     }
 
     public BeverageNutrition(
+            Double servingMl,
             Integer servingKcal,
             Double saturatedFatG,
             Double proteinG,
             Integer sodiumMg,
             Integer sugarG,
             Integer caffeineMg) {
+        this.servingMl = servingMl;
         this.servingKcal = servingKcal;
         this.saturatedFatG = saturatedFatG;
         this.proteinG = proteinG;
@@ -80,6 +86,6 @@ public class BeverageNutrition {
     }
 
     public static BeverageNutrition empty() {
-        return new BeverageNutrition(0, 0.0, 0.0, 0, 0, 0);
+        return new BeverageNutrition(0.0, 0, 0.0, 0.0, 0, 0, 0);
     }
 }

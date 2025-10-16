@@ -16,7 +16,7 @@ public class CustomClock {
         return instance.timeNow();
     }
 
-    protected void setInstance(CustomClock customClock) {
+    public static void setInstance(CustomClock customClock) {
         CustomClock.instance = customClock;
     }
 

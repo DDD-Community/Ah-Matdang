@@ -1,6 +1,7 @@
 package be.ddd.domain.entity.crawling;
 
 import java.util.Arrays;
+import java.util.Optional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -11,6 +12,7 @@ public enum BeverageSize {
     GRANDE("Grande", 473),
     VENTI("Venti", 591),
     SHORT("Short", 237),
+    MEGA("Mega", 591),
     OTHER("Other", 0);
 
     private final String displayName;
@@ -20,6 +22,12 @@ public enum BeverageSize {
         return Arrays.stream(values())
                 .filter(size -> size.name().equalsIgnoreCase(text))
                 .findFirst()
-                .orElse(OTHER);
+                .orElse(null);
+    }
+
+    public static Optional<BeverageSize> fromStringOptional(String text) {
+        return Arrays.stream(values())
+                .filter(size -> size.name().equalsIgnoreCase(text))
+                .findFirst();
     }
 }

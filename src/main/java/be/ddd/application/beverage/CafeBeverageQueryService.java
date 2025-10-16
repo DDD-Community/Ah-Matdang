@@ -17,7 +17,8 @@ public interface CafeBeverageQueryService {
             Optional<CafeBrand> brandFilter,
             Optional<SugarLevel> sugarLevel,
             Long memberId,
-            Boolean onlyLiked);
+            Boolean onlyLiked,
+            Optional<be.ddd.domain.entity.crawling.BeverageSize> preferredSize);
 
     CafeBeverageDetailsDto getCafeBeverageByProductId(UUID productId);
 
