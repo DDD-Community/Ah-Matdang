@@ -36,14 +36,15 @@ public class CafeBeverageQueryServiceImpl implements CafeBeverageQueryService {
             Optional<CafeBrand> brandFilter,
             Optional<SugarLevel> sugarLevel,
             Long memberId,
-            Boolean onlyLiked) {
+            Boolean onlyLiked,
+            Optional<be.ddd.domain.entity.crawling.BeverageSize> preferredSize) {
 
         CafeBrand brand = brandFilter.orElse(null);
         SugarLevel sugar = sugarLevel.orElse(null);
 
         List<CafeBeveragePageDto> fetched =
                 beverageRepository.findWithCursor(
-                        cursor, size + 1, brand, sugar, memberId, onlyLiked);
+                        cursor, size + 1, brand, sugar, memberId, onlyLiked, preferredSize);
 
         boolean hasNext = fetched.size() > size;
 

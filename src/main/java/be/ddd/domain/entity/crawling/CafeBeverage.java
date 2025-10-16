@@ -50,7 +50,7 @@ public class CafeBeverage extends BaseTimeEntity {
         /* log.info(
                         "[DEBUG] Updating beverage: '{}'. DTO contains sizes: {}. DB entity has sizes: {}",
                         this.name,
-                        dto.beverageNutritions().keySet(),
+                        dto.beverageNutritions().stream().map(n -> n.size()).collect(Collectors.toList()),
                         this.sizes.stream().map(BeverageSizeInfo::getSizeType).collect(Collectors.toList()));
         */
         if (dto.image() != null) {
@@ -71,8 +71,12 @@ public class CafeBeverage extends BaseTimeEntity {
 
             dto.beverageNutritions()
                     .forEach(
-                            (sizeStr, nutritionDto) -> {
-                                BeverageSize size = BeverageSize.fromString(sizeStr);
+                            nutritionDto -> {
+                                BeverageSize size = BeverageSize.fromString(nutritionDto.size());
+                                if (size == null) {
+                                    // Log a warning or handle the unknown size as appropriate
+                                    return;
+                                }
                                 BeverageNutrition nutrition = BeverageNutrition.from(nutritionDto);
                                 if (existingSizes.containsKey(size)) {
                                     existingSizes.get(size).updateBeverageNutrition(nutrition);
@@ -126,6 +130,10 @@ public class CafeBeverage extends BaseTimeEntity {
         beverageNutritions.forEach(
                 (sizeStr, nutritionDto) -> {
                     BeverageSize size = BeverageSize.fromString(sizeStr);
+                    if (size == null) {
+                        // Log a warning or handle the unknown size as appropriate
+                        return;
+                    }
                     BeverageNutrition nutrition = BeverageNutrition.from(nutritionDto);
                     BeverageSizeInfo sizeInfo = new BeverageSizeInfo(beverage, size, nutrition);
                     beverage.sizes.add(sizeInfo);

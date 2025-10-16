@@ -8,6 +8,7 @@ import be.ddd.application.beverage.dto.CafeBeveragePageDto;
 import be.ddd.application.member.MemberQueryService;
 import be.ddd.common.dto.ApiResponse;
 import be.ddd.common.util.StringBase64EncodingUtil;
+import be.ddd.domain.entity.crawling.BeverageSize;
 import be.ddd.domain.entity.crawling.CafeBrand;
 import be.ddd.domain.entity.crawling.SugarLevel;
 import jakarta.validation.constraints.Positive;
@@ -36,6 +37,7 @@ public class CafeBeverageAPI {
             @RequestParam(defaultValue = "15") @Positive int size,
             @RequestParam(required = false) String cafeBrand,
             @RequestParam(required = false) String sugarLevel,
+            @RequestParam(required = false) String sizeType,
             @RequestParam(required = false) Boolean onlyLiked,
             @CurrentUser String providerId) {
         Long decodedCursor =
@@ -46,6 +48,9 @@ public class CafeBeverageAPI {
 
         Optional<SugarLevel> sugar = SugarLevel.fromParam(sugarLevel);
 
+        Optional<BeverageSize> preferredSize =
+                Optional.ofNullable(sizeType).flatMap(BeverageSize::fromStringOptional);
+
         CafeBeverageCursorPageDto<CafeBeveragePageDto> results =
                 cafeBeverageQueryService.getCafeBeverageCursorPage(
                         decodedCursor,
@@ -53,7 +58,8 @@ public class CafeBeverageAPI {
                         brand,
                         sugar,
                         memberQueryService.getMemberIdByProviderId(providerId),
-                        onlyLiked);
+                        onlyLiked,
+                        preferredSize);
         return ApiResponse.success(results);
     }
 
