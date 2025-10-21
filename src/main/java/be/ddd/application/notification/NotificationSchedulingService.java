@@ -30,10 +30,16 @@ public class NotificationSchedulingService {
     @Scheduled(cron = "0 * * * * *")
     public void sendSugarIntakeNotifications() {
         LocalTime now = CustomClock.now().toLocalTime();
+        log.info("[NotificationTest] 1. Current fake time: {}", now);
 
         List<Member> members = memberRepository.findAllByNotificationEnabledAndReminderTime(now);
+        log.info(
+                "[NotificationTest] 2. Found {} members with reminder time {}",
+                members.size(),
+                now);
 
         if (members.isEmpty()) {
+            log.info("[NotificationTest] No members found. Exiting.");
             return;
         }
 
@@ -42,14 +48,26 @@ public class NotificationSchedulingService {
 
         Map<Long, Double> totalSugars =
                 intakeHistoryRepository.sumSugarByMemberIdsAndDate(memberIds, LocalDateTime.now());
+        log.info(
+                "[NotificationTest] 3. Found sugar intake data for {} members.",
+                totalSugars.size());
 
         for (Member member : members) {
+            log.info("[NotificationTest] 4. Checking member with ID: {}", member.getId());
             Double totalSugarToday = totalSugars.get(member.getId());
             if (totalSugarToday != null) {
+                log.info(
+                        "[NotificationTest] 5. Member {} has sugar intake ({}g). Sending notification.",
+                        member.getId(),
+                        totalSugarToday);
                 fcmService.sendNotification(
                         member.getDeviceToken(),
                         "오늘의 당 섭취량 알림",
                         "오늘 하루 총 " + totalSugarToday + "g의 당을 섭취했습니다.");
+            } else {
+                log.info(
+                        "[NotificationTest] 5. Member {} has NO sugar intake today. Skipping.",
+                        member.getId());
             }
         }
     }
