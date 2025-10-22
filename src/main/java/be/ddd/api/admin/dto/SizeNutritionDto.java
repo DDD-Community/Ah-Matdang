@@ -6,7 +6,7 @@ public record SizeNutritionDto(
         BeverageSize size,
         Integer servingKcal,
         Double saturatedFatG,
-        Double proteinG,
+        Integer proteinG,
         Integer sodiumMg,
         Integer sugarG,
         Integer caffeineMg) {}

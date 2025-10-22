@@ -18,6 +18,10 @@ spring:
     username: ENC(EUc5lpk9Sn77473PV6hm7Q==)
     password: ENC(7pCO5qSn9x5VNppvYxsJUrZLTfWiNggsIrFpPpTSjyI=)
     driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      max-lifetime: 1800000 # 30 minutes
+      connection-timeout: 30000 # 30 seconds
+      validation-timeout: 5000 # 5 seconds
   jpa:
     open-in-view: false
     hibernate:
