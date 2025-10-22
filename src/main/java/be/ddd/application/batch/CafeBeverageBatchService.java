@@ -25,7 +25,8 @@ public class CafeBeverageBatchService {
     private final CafeBeverageRepository repository;
     private final WebClient.Builder webClientBuilder;
 
-    private final String lambdaUrl = "http://localhost:8000/api/v1/beverages";
+    private final String lambdaUrl =
+            "https://u6wvrcscqwe7rdbblr3xebajf40avfxz.lambda-url.ap-northeast-2.on.aws/";
     private final CafeStoreRepository cafeStoreRepository;
 
     public List<LambdaBeverageDto> fetchAll() {

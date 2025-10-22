@@ -23,12 +23,14 @@ import org.springframework.batch.item.database.builder.JpaItemWriterBuilder;
 import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 @EnableBatchProcessing
 @RequiredArgsConstructor
 @Log4j2
+@Profile("!prod")
 public class BeverageBatchConfig {
 
     private final CafeBeverageBatchService cafeBeverageBatchService;

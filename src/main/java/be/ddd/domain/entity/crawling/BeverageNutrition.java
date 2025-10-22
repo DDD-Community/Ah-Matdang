@@ -24,7 +24,7 @@ public class BeverageNutrition {
     private Double saturatedFatG; // 포화지방(g)
 
     @Column(name = "PROTEIN_G", nullable = false)
-    private Double proteinG; // 단백질(g)
+    private Integer proteinG; // 단백질(g)
 
     @Column(name = "SODIUM_MG", nullable = false)
     private Integer sodiumMg; // 나트륨(mg)
@@ -40,7 +40,7 @@ public class BeverageNutrition {
                 parseDouble(dto.servingMl()),
                 parseInt(dto.servingKcal()),
                 parseDouble(dto.saturatedFatG()),
-                parseDouble(dto.proteinG()),
+                parseInt(dto.proteinG()),
                 parseInt(dto.sodiumMg()),
                 parseInt(dto.sugarG()),
                 parseInt(dto.caffeineMg()));
@@ -51,7 +51,7 @@ public class BeverageNutrition {
             return 0;
         }
         try {
-            return Integer.parseInt(value);
+            return Double.valueOf(value).intValue();
         } catch (NumberFormatException e) {
             return 0;
         }
@@ -72,7 +72,7 @@ public class BeverageNutrition {
             Double servingMl,
             Integer servingKcal,
             Double saturatedFatG,
-            Double proteinG,
+            Integer proteinG,
             Integer sodiumMg,
             Integer sugarG,
             Integer caffeineMg) {
@@ -86,6 +86,6 @@ public class BeverageNutrition {
     }
 
     public static BeverageNutrition empty() {
-        return new BeverageNutrition(0.0, 0, 0.0, 0.0, 0, 0, 0);
+        return new BeverageNutrition(0.0, 0, 0.0, 0, 0, 0, 0);
     }
 }

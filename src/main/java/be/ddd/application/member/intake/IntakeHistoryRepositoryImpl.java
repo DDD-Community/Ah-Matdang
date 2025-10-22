@@ -137,13 +137,28 @@ public class IntakeHistoryRepositoryImpl implements IntakeHistoryRepositoryCusto
                         intakeHistory.member.id,
                         beverageSizeInfo.beverageNutrition.sugarG.doubleValue().sum())
                 .from(intakeHistory)
-                .leftJoin(intakeHistory.cafeBeverage.sizes, beverageSizeInfo)
+                .leftJoin(beverageSizeInfo)
+                .on(
+                        beverageSizeInfo
+                                .cafeBeverage
+                                .id
+                                .eq(intakeHistory.cafeBeverage.id)
+                                .and(beverageSizeInfo.sizeType.eq(intakeHistory.sizeType)))
                 .where(
                         intakeHistory.member.id.in(memberIds),
                         intakeHistory.intakeTime.between(startOfDay, endOfDay))
                 .groupBy(intakeHistory.member.id)
-                .transform(
-                        com.querydsl.core.group.GroupBy.groupBy(intakeHistory.member.id)
-                                .as(beverageSizeInfo.beverageNutrition.sugarG.doubleValue().sum()));
+                .fetch()
+                .stream()
+                .collect(
+                        Collectors.toMap(
+                                tuple -> tuple.get(intakeHistory.member.id),
+                                tuple ->
+                                        tuple.get(
+                                                beverageSizeInfo
+                                                        .beverageNutrition
+                                                        .sugarG
+                                                        .doubleValue()
+                                                        .sum())));
     }
 }
