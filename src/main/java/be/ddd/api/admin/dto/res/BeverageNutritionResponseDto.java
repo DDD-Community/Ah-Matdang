@@ -8,7 +8,7 @@ public class BeverageNutritionResponseDto {
     private final Double servingMl;
     private final Integer servingKcal;
     private final Double saturatedFatG;
-    private final Double proteinG;
+    private final Integer proteinG;
     private final Integer sodiumMg;
     private final Integer sugarG;
     private final Integer caffeineMg;
