@@ -13,6 +13,7 @@ public record CafeBeveragePageDto(
         String imgUrl,
         BeverageType beverageType,
         CafeStoreDto cafeStoreDto,
+        String koreanBrandName,
         BeverageNutrition beverageNutrition,
         boolean isLiked) {
 
@@ -24,6 +25,7 @@ public record CafeBeveragePageDto(
                 e.getImgUrl(),
                 e.getBeverageType(),
                 new CafeStoreDto(e.getCafeStore().getCafeBrand()),
+                e.getCafeStore().getCafeBrand().getKoreanName(),
                 e.getSizes().get(0).getBeverageNutrition(),
                 isLiked);
     }
