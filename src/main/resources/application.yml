@@ -29,6 +29,9 @@ spring:
 #  config: classpath:logback-dev.xml
 #  discord:
 #    webhook-uri: https://discord.com/api/webhooks/1254394407206125568/7yvFd17WWaMmLLRyvGiagz687wo_QDCPC419w4xLaZS9Ul8ERZ-LZz9PkCrAHb0C4Ssy
+notification:
+  failure-discord-webhook-uri: ENC(QzR187gVH3dIZGcPjOhhYzazXONChAWjKcHcIEmGq47fbzQyn2c6WoS7BcvJDIMizh/XMFcyqXMi/EAqDI/CP8UVQqCZmZZ8vbbgiBql0rc6h9i6Fui038aoKs0tcv1r7iZ5LM0RS8UBCH+ODKRtXLXgdxEl3agiwOuOdmtXJB1wOvdKUP1zbg==)
+
 #  pattern:
 #    console: "%d{HH:mm:ss} [%thread] [%-5level] %logger{36} - %msg%n"
 

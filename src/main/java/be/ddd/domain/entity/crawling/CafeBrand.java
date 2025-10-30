@@ -11,9 +11,9 @@ import lombok.ToString;
 @Getter
 @ToString
 public enum CafeBrand {
-    STARBUCKS("starbucks"),
-    MEGA_COFFEE("megacoffee"),
-    TEST("test");
+    STARBUCKS("starbucks", "스타벅스"),
+    MEGA_COFFEE("megacoffee", "메가커피"),
+    TEST("test", "테스트");
 
     private static final Map<String, CafeBrand> BY_DISPLAY_NAME =
             Arrays.stream(values())
@@ -22,9 +22,11 @@ public enum CafeBrand {
                                     brand -> brand.displayName.toLowerCase(), brand -> brand));
 
     private final String displayName;
+    private final String koreanName;
 
-    CafeBrand(String displayName) {
+    CafeBrand(String displayName, String koreanName) {
         this.displayName = displayName;
+        this.koreanName = koreanName;
     }
 
     @JsonCreator

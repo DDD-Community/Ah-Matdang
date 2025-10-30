@@ -15,6 +15,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.annotation.Nullable;
@@ -50,6 +51,16 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
         BooleanExpression sizeTypeCondition =
                 preferredSize.map(beverageSizeInfo.sizeType::eq).orElse(null);
 
+        StringExpression koreanBrandName =
+                new CaseBuilder()
+                        .when(beverage.cafeStore.cafeBrand.eq(CafeBrand.STARBUCKS))
+                        .then(CafeBrand.STARBUCKS.getKoreanName())
+                        .when(beverage.cafeStore.cafeBrand.eq(CafeBrand.MEGA_COFFEE))
+                        .then(CafeBrand.MEGA_COFFEE.getKoreanName())
+                        .when(beverage.cafeStore.cafeBrand.eq(CafeBrand.TEST))
+                        .then(CafeBrand.TEST.getKoreanName())
+                        .otherwise("");
+
         return queryFactory
                 .select(
                         Projections.constructor(
@@ -61,6 +72,7 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
                                 beverage.beverageType,
                                 Projections.constructor(
                                         CafeStoreDto.class, beverage.cafeStore.cafeBrand),
+                                koreanBrandName,
                                 beverageSizeInfo.beverageNutrition,
                                 memberBeverageLike.isNotNull()))
                 .from(beverage)
