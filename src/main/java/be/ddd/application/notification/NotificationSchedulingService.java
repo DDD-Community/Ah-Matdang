@@ -1,5 +1,6 @@
 package be.ddd.application.notification;
 
+import be.ddd.application.discord.DiscordNotificationService;
 import be.ddd.common.util.CustomClock;
 import be.ddd.domain.entity.member.Member;
 import be.ddd.domain.repo.IntakeHistoryRepository;
@@ -25,6 +26,7 @@ public class NotificationSchedulingService {
     private final MemberRepository memberRepository;
     private final IntakeHistoryRepository intakeHistoryRepository;
     private final FCMService fcmService;
+    private final DiscordNotificationService discordNotificationService;
 
     @Async
     @Scheduled(cron = "0 * * * * *")
@@ -60,10 +62,19 @@ public class NotificationSchedulingService {
                         "[NotificationTest] 5. Member {} has sugar intake ({}g). Sending notification.",
                         member.getId(),
                         totalSugarToday);
-                fcmService.sendNotification(
-                        member.getDeviceToken(),
-                        "오늘의 당 섭취량 알림",
-                        "오늘 하루 총 " + totalSugarToday + "g의 당을 섭취했습니다.");
+                try {
+                    fcmService.sendNotification(
+                            member.getDeviceToken(),
+                            "오늘의 당 섭취량 알림",
+                            "오늘 하루 총 " + totalSugarToday + "g의 당을 섭취했습니다.");
+                } catch (Exception e) {
+                    log.error("Failed to send notification to member: {}", member.getId(), e);
+                    discordNotificationService.sendNotification(
+                            "Failed to send notification to member: "
+                                    + member.getId()
+                                    + "\n"
+                                    + e.getMessage());
+                }
             } else {
                 log.info(
                         "[NotificationTest] 5. Member {} has NO sugar intake today. Skipping.",
