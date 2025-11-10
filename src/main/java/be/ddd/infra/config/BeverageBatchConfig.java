@@ -5,7 +5,6 @@ import be.ddd.application.batch.dto.LambdaBeverageDto;
 import be.ddd.domain.entity.crawling.CafeBeverage;
 import jakarta.persistence.EntityManagerFactory;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.batch.core.Job;
@@ -56,14 +55,14 @@ public class BeverageBatchConfig {
 
         return items -> {
             log.info("[DEBUG] Writing {} items to DB.", items.size());
-            for (CafeBeverage item : items) {
+            /*for (CafeBeverage item : items) {
                 log.info(
                         "[DEBUG]   - Writing beverage: '{}', with sizes: {}",
                         item.getName(),
                         item.getSizes().stream()
                                 .map(s -> s.getSizeType().name())
                                 .collect(Collectors.toList()));
-            }
+            }*/
             writer.write(items);
         };
     }

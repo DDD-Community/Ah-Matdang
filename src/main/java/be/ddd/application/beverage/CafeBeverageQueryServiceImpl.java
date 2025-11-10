@@ -1,18 +1,26 @@
 package be.ddd.application.beverage;
 
-import be.ddd.api.dto.res.*;
+import be.ddd.api.dto.res.BeverageCountDto;
+import be.ddd.api.dto.res.BeverageSearchResultDto;
+import be.ddd.api.dto.res.BeverageSizeDetailDto;
+import be.ddd.api.dto.res.CafeBeverageDetailsDto;
+import be.ddd.application.beverage.dto.BeverageInfoInBrandDto;
 import be.ddd.application.beverage.dto.BeverageSearchDto;
-import be.ddd.application.beverage.dto.CafeBeveragePageDto;
+import be.ddd.application.beverage.dto.BrandBeverageDto;
+import be.ddd.application.beverage.dto.BrandBeverageListResponseDto;
 import be.ddd.application.beverage.dto.CafeStoreDto;
 import be.ddd.common.util.StringBase64EncodingUtil;
 import be.ddd.domain.entity.crawling.BeverageNutrition;
+import be.ddd.domain.entity.crawling.BeverageSize;
 import be.ddd.domain.entity.crawling.CafeBeverage;
 import be.ddd.domain.entity.crawling.CafeBrand;
 import be.ddd.domain.entity.crawling.SugarLevel;
 import be.ddd.domain.exception.CafeBeverageNotFoundException;
 import be.ddd.domain.repo.CafeBeverageRepository;
-import be.ddd.domain.repo.MemberBeverageLikeRepository;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -27,52 +35,43 @@ import org.springframework.transaction.annotation.Transactional;
 public class CafeBeverageQueryServiceImpl implements CafeBeverageQueryService {
     private final CafeBeverageRepository beverageRepository;
     private final StringBase64EncodingUtil encodingUtil;
-    private final MemberBeverageLikeRepository likeRepository;
 
     @Override
-    public CafeBeverageCursorPageDto<CafeBeveragePageDto> getCafeBeverageCursorPage(
+    public BrandBeverageListResponseDto getCafeBeverageCursorPage(
             Long cursor,
             int size,
             Optional<CafeBrand> brandFilter,
             Optional<SugarLevel> sugarLevel,
             Long memberId,
             Boolean onlyLiked,
-            Optional<be.ddd.domain.entity.crawling.BeverageSize> preferredSize) {
-
+            Optional<BeverageSize> preferredSize) {
         CafeBrand brand = brandFilter.orElse(null);
         SugarLevel sugar = sugarLevel.orElse(null);
-
-        List<CafeBeveragePageDto> fetched =
+        List<BeverageInfoInBrandDto> fetched =
                 beverageRepository.findWithCursor(
                         cursor, size + 1, brand, sugar, memberId, onlyLiked, preferredSize);
-
         boolean hasNext = fetched.size() > size;
-
         String nextCursor = null;
         if (hasNext) {
             nextCursor = encodingUtil.encodeSignedCursor(fetched.get(size - 1).id());
         }
-
         long totalLikedCount =
                 beverageRepository.countAllLikedByMemberAndFilters(brand, sugar, memberId);
-
-        List<CafeBeveragePageDto> pageResults = fetched.stream().limit(size).toList();
-
-        return new CafeBeverageCursorPageDto<>(pageResults, nextCursor, hasNext, totalLikedCount);
+        List<BeverageInfoInBrandDto> pageResults = fetched.stream().limit(size).toList();
+        List<BrandBeverageDto> groupedResults = groupByBrand(pageResults);
+        return new BrandBeverageListResponseDto(
+                groupedResults, nextCursor, hasNext, totalLikedCount);
     }
 
     @Override
     public CafeBeverageDetailsDto getCafeBeverageByProductId(UUID productId) {
-
         log.info("product detail query:{}", productId);
         CafeBeverage fetch =
                 beverageRepository
                         .findByProductId(productId)
                         .orElseThrow(CafeBeverageNotFoundException::new);
-
         BeverageNutrition defaultNutrition;
         List<BeverageSizeDetailDto> sizes;
-
         if (fetch.getSizes().isEmpty()) {
             defaultNutrition = BeverageNutrition.empty();
             sizes = List.of();
@@ -87,7 +86,6 @@ public class CafeBeverageQueryServiceImpl implements CafeBeverageQueryService {
                                                     sizeInfo.getBeverageNutrition()))
                             .toList();
         }
-
         return CafeBeverageDetailsDto.from(
                 fetch.getName(),
                 fetch.getProductId(),
@@ -101,9 +99,7 @@ public class CafeBeverageQueryServiceImpl implements CafeBeverageQueryService {
     @Override
     public BeverageCountDto getBeverageCountByBrandAndSugarLevel(
             Optional<CafeBrand> brandFilter, Long memberId) {
-
         CafeBrand brand = brandFilter.orElse(null);
-
         return beverageRepository.countSugarLevelByBrand(brand, memberId);
     }
 
@@ -113,16 +109,31 @@ public class CafeBeverageQueryServiceImpl implements CafeBeverageQueryService {
         List<BeverageSearchDto> beverageSearchResults =
                 beverageRepository.searchByName(keyword, memberId, sugarLevel, onlyLiked);
         long likeCount = beverageSearchResults.stream().filter(BeverageSearchDto::isLiked).count();
-
         BeverageCountDto counts =
                 beverageRepository.countSugarLevelBySearchFilters(
                         keyword, memberId, sugarLevel, onlyLiked);
-
         return new BeverageSearchResultDto(
                 beverageSearchResults,
                 counts.likeCount(),
                 counts.totalCount(),
                 counts.zeroCount(),
                 counts.lowCount());
+    }
+
+    private List<BrandBeverageDto> groupByBrand(List<BeverageInfoInBrandDto> beverages) {
+        Map<CafeBrand, List<BeverageInfoInBrandDto>> grouped = new LinkedHashMap<>();
+        for (BeverageInfoInBrandDto beverage : beverages) {
+            grouped.computeIfAbsent(beverage.cafeBrand(), ignored -> new ArrayList<>())
+                    .add(beverage);
+        }
+        return grouped.entrySet().stream()
+                .map(
+                        entry -> {
+                            CafeBrand cafeBrand = entry.getKey();
+                            String koreanName =
+                                    cafeBrand != null ? cafeBrand.getKoreanName() : null;
+                            return new BrandBeverageDto(koreanName, entry.getValue());
+                        })
+                .toList();
     }
 }

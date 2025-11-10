@@ -4,7 +4,7 @@ import be.ddd.api.dto.res.*;
 import be.ddd.api.security.custom.CurrentUser;
 import be.ddd.application.beverage.BeverageLikeService;
 import be.ddd.application.beverage.CafeBeverageQueryService;
-import be.ddd.application.beverage.dto.CafeBeveragePageDto;
+import be.ddd.application.beverage.dto.BrandBeverageListResponseDto;
 import be.ddd.application.member.MemberQueryService;
 import be.ddd.common.dto.ApiResponse;
 import be.ddd.common.util.StringBase64EncodingUtil;
@@ -32,7 +32,7 @@ public class CafeBeverageAPI {
     private final MemberQueryService memberQueryService;
 
     @GetMapping
-    public ApiResponse<CafeBeverageCursorPageDto<CafeBeveragePageDto>> getCafeBeverages(
+    public ApiResponse<BrandBeverageListResponseDto> getCafeBeverages(
             @RequestParam(required = false) String cursor,
             @RequestParam(defaultValue = "15") @Positive int size,
             @RequestParam(required = false) String cafeBrand,
@@ -51,7 +51,7 @@ public class CafeBeverageAPI {
         Optional<BeverageSize> preferredSize =
                 Optional.ofNullable(sizeType).flatMap(BeverageSize::fromStringOptional);
 
-        CafeBeverageCursorPageDto<CafeBeveragePageDto> results =
+        BrandBeverageListResponseDto results =
                 cafeBeverageQueryService.getCafeBeverageCursorPage(
                         decodedCursor,
                         size,

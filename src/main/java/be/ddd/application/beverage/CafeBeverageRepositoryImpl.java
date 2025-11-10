@@ -4,8 +4,8 @@ import static com.querydsl.core.types.dsl.Expressions.constant;
 import static com.querydsl.core.types.dsl.Expressions.numberTemplate;
 
 import be.ddd.api.dto.res.BeverageCountDto;
+import be.ddd.application.beverage.dto.BeverageInfoInBrandDto;
 import be.ddd.application.beverage.dto.BeverageSearchDto;
-import be.ddd.application.beverage.dto.CafeBeveragePageDto;
 import be.ddd.application.beverage.dto.CafeStoreDto;
 import be.ddd.application.beverage.dto.QBeverageSearchDto;
 import be.ddd.domain.entity.crawling.*;
@@ -15,7 +15,6 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.NumberExpression;
-import com.querydsl.core.types.dsl.StringExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.annotation.Nullable;
@@ -39,7 +38,7 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
     private final QMemberBeverageLike memberBeverageLike = QMemberBeverageLike.memberBeverageLike;
 
     @Override
-    public List<CafeBeveragePageDto> findWithCursor(
+    public List<BeverageInfoInBrandDto> findWithCursor(
             Long cursor,
             int limit,
             @Nullable CafeBrand brand,
@@ -51,28 +50,16 @@ public class CafeBeverageRepositoryImpl implements CafeBeverageRepositoryCustom 
         BooleanExpression sizeTypeCondition =
                 preferredSize.map(beverageSizeInfo.sizeType::eq).orElse(null);
 
-        StringExpression koreanBrandName =
-                new CaseBuilder()
-                        .when(beverage.cafeStore.cafeBrand.eq(CafeBrand.STARBUCKS))
-                        .then(CafeBrand.STARBUCKS.getKoreanName())
-                        .when(beverage.cafeStore.cafeBrand.eq(CafeBrand.MEGA_COFFEE))
-                        .then(CafeBrand.MEGA_COFFEE.getKoreanName())
-                        .when(beverage.cafeStore.cafeBrand.eq(CafeBrand.TEST))
-                        .then(CafeBrand.TEST.getKoreanName())
-                        .otherwise("");
-
         return queryFactory
                 .select(
                         Projections.constructor(
-                                CafeBeveragePageDto.class,
+                                BeverageInfoInBrandDto.class,
                                 beverage.id,
+                                beverage.cafeStore.cafeBrand,
                                 beverage.productId,
                                 beverage.name,
                                 beverage.imgUrl,
                                 beverage.beverageType,
-                                Projections.constructor(
-                                        CafeStoreDto.class, beverage.cafeStore.cafeBrand),
-                                koreanBrandName,
                                 beverageSizeInfo.beverageNutrition,
                                 memberBeverageLike.isNotNull()))
                 .from(beverage)
