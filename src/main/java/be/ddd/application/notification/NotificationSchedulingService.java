@@ -1,12 +1,12 @@
 package be.ddd.application.notification;
 
 import be.ddd.application.discord.DiscordNotificationService;
-import be.ddd.common.util.CustomClock;
+import be.ddd.common.util.KoreanTimeService;
 import be.ddd.domain.entity.member.Member;
 import be.ddd.domain.repo.IntakeHistoryRepository;
 import be.ddd.domain.repo.MemberRepository;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,12 +27,14 @@ public class NotificationSchedulingService {
     private final IntakeHistoryRepository intakeHistoryRepository;
     private final FCMService fcmService;
     private final DiscordNotificationService discordNotificationService;
+    private final KoreanTimeService koreanTimeService;
 
     @Async
     @Scheduled(cron = "0 * * * * *")
     public void sendSugarIntakeNotifications() {
-        LocalTime now = CustomClock.now().toLocalTime();
-        log.info("[NotificationTest] 1. Current fake time: {}", now);
+        ZonedDateTime koreaNow = koreanTimeService.now();
+        LocalTime now = koreaNow.toLocalTime();
+        log.info("[NotificationTest] 1. Current KST time: {}", koreaNow);
 
         List<Member> members = memberRepository.findAllByNotificationEnabledAndReminderTime(now);
         log.info(
@@ -49,7 +51,8 @@ public class NotificationSchedulingService {
                 members.stream().map(Member::getProviderId).collect(Collectors.toList());
 
         Map<Long, Double> totalSugars =
-                intakeHistoryRepository.sumSugarByMemberIdsAndDate(memberIds, LocalDateTime.now());
+                intakeHistoryRepository.sumSugarByMemberIdsAndDate(
+                        memberIds, koreaNow.toLocalDateTime());
         log.info(
                 "[NotificationTest] 3. Found sugar intake data for {} members.",
                 totalSugars.size());
