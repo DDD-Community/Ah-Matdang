@@ -41,7 +41,7 @@ public class CafeBeverage extends BaseTimeEntity {
     private BeverageType beverageType;
 
     @Enumerated(EnumType.STRING)
-    private SugarLevel sugarLevel;
+    private SugarLevel sugarLevel = SugarLevel.HIGH;
 
     @OneToMany(mappedBy = "cafeBeverage", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BeverageSizeInfo> sizes = new ArrayList<>();
@@ -50,7 +50,9 @@ public class CafeBeverage extends BaseTimeEntity {
         /* log.info(
                         "[DEBUG] Updating beverage: '{}'. DTO contains sizes: {}. DB entity has sizes: {}",
                         this.name,
-                        dto.beverageNutritions().stream().map(n -> n.size()).collect(Collectors.toList()),
+                        dto.beverageNutritions() == null
+                                ? List.of()
+                                : dto.beverageNutritions().keySet(),
                         this.sizes.stream().map(BeverageSizeInfo::getSizeType).collect(Collectors.toList()));
         */
         if (dto.image() != null) {
@@ -62,33 +64,34 @@ public class CafeBeverage extends BaseTimeEntity {
                     BeverageType.valueOf(dto.beverageType().toUpperCase().replace(" ", "_"));
         }
 
-        if (dto.beverageNutritions() != null && !dto.beverageNutritions().isEmpty()) {
+        Map<String, BeverageNutritionDto> nutritionMap = dto.beverageNutritions();
+        if (nutritionMap != null && !nutritionMap.isEmpty()) {
             Map<BeverageSize, BeverageSizeInfo> existingSizes =
                     this.sizes.stream()
                             .collect(
                                     Collectors.toMap(
                                             BeverageSizeInfo::getSizeType, Function.identity()));
 
-            dto.beverageNutritions()
-                    .forEach(
-                            nutritionDto -> {
-                                BeverageSize size = BeverageSize.fromString(nutritionDto.size());
-                                if (size == null) {
-                                    // Log a warning or handle the unknown size as appropriate
-                                    return;
-                                }
-                                BeverageNutrition nutrition = BeverageNutrition.from(nutritionDto);
-                                if (existingSizes.containsKey(size)) {
-                                    existingSizes.get(size).updateBeverageNutrition(nutrition);
-                                } else {
-                                    addSizeInfo(new BeverageSizeInfo(this, size, nutrition));
-                                }
-                            });
+            nutritionMap.forEach(
+                    (sizeKey, nutritionDto) -> {
+                        BeverageSize size = BeverageSize.fromString(sizeKey);
+                        if (size == null) {
+                            // Log a warning or handle the unknown size as appropriate
+                            return;
+                        }
+                        BeverageNutrition nutrition = BeverageNutrition.from(nutritionDto);
+                        if (existingSizes.containsKey(size)) {
+                            existingSizes.get(size).updateBeverageNutrition(nutrition);
+                        } else {
+                            addSizeInfo(new BeverageSizeInfo(this, size, nutrition));
+                        }
+                    });
 
-            // 대표 당 레벨 업데이트 (예: TALL 사이즈 기준)
+            // 대표 당 레벨 업데이트 (예: TALL 우선, 없으면 첫 사이즈)
             this.sizes.stream()
                     .filter(s -> s.getSizeType() == BeverageSize.TALL)
                     .findFirst()
+                    .or(() -> this.sizes.stream().findFirst())
                     .ifPresent(
                             sizeInfo -> {
                                 BeverageNutrition nutrition = sizeInfo.getBeverageNutrition();
@@ -99,6 +102,10 @@ public class CafeBeverage extends BaseTimeEntity {
                                                     sizeInfo.getSizeType().getVolume());
                                 }
                             });
+
+            if (this.sugarLevel == null) {
+                this.sugarLevel = SugarLevel.HIGH;
+            }
         }
     }
 
@@ -127,17 +134,19 @@ public class CafeBeverage extends BaseTimeEntity {
         beverage.imgUrl = imgUrl;
         beverage.beverageType = beverageType;
 
-        beverageNutritions.forEach(
-                (sizeStr, nutritionDto) -> {
-                    BeverageSize size = BeverageSize.fromString(sizeStr);
-                    if (size == null) {
-                        // Log a warning or handle the unknown size as appropriate
-                        return;
-                    }
-                    BeverageNutrition nutrition = BeverageNutrition.from(nutritionDto);
-                    BeverageSizeInfo sizeInfo = new BeverageSizeInfo(beverage, size, nutrition);
-                    beverage.sizes.add(sizeInfo);
-                });
+        if (beverageNutritions != null) {
+            beverageNutritions.forEach(
+                    (sizeStr, nutritionDto) -> {
+                        BeverageSize size = BeverageSize.fromString(sizeStr);
+                        if (size == null) {
+                            // Log a warning or handle the unknown size as appropriate
+                            return;
+                        }
+                        BeverageNutrition nutrition = BeverageNutrition.from(nutritionDto);
+                        BeverageSizeInfo sizeInfo = new BeverageSizeInfo(beverage, size, nutrition);
+                        beverage.sizes.add(sizeInfo);
+                    });
+        }
 
         beverage.sizes.stream()
                 .filter(s -> s.getSizeType() == BeverageSize.TALL)
@@ -153,6 +162,10 @@ public class CafeBeverage extends BaseTimeEntity {
                                                 sizeInfo.getSizeType().getVolume());
                             }
                         });
+
+        if (beverage.sugarLevel == null) {
+            beverage.sugarLevel = SugarLevel.HIGH;
+        }
 
         return beverage;
     }

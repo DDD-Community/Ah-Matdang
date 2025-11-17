@@ -1,12 +1,13 @@
 package be.ddd.application.batch.dto;
 
-import be.ddd.domain.entity.crawling.*;
-import java.util.List;
+import be.ddd.application.batch.dto.deserializer.BeverageNutritionsDeserializer;
+import be.ddd.domain.entity.crawling.BeverageType;
+import be.ddd.domain.entity.crawling.CafeBeverage;
+import be.ddd.domain.entity.crawling.CafeStore;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public record LambdaBeverageDto(
         String brand,
@@ -14,7 +15,8 @@ public record LambdaBeverageDto(
         String image,
         String beverageType,
         String beverageTemperature,
-        List<BeverageNutritionDto> beverageNutritions) {
+        @JsonDeserialize(using = BeverageNutritionsDeserializer.class)
+                Map<String, BeverageNutritionDto> beverageNutritions) {
 
     public CafeBeverage toEntity(CafeStore cafeStore) {
         BeverageType type =
@@ -23,14 +25,6 @@ public record LambdaBeverageDto(
                         .map(BeverageType::valueOf)
                         .orElse(BeverageType.ANY);
 
-        Map<String, BeverageNutritionDto> nutritionsMap =
-                beverageNutritions.stream()
-                        .collect(
-                                Collectors.toMap(
-                                        BeverageNutritionDto::size,
-                                        Function.identity(),
-                                        (existing, replacement) -> existing));
-
         return CafeBeverage.of(
                 name,
                 UUID.randomUUID(),
@@ -38,6 +32,6 @@ public record LambdaBeverageDto(
                 image,
                 type,
                 beverageTemperature,
-                nutritionsMap);
+                beverageNutritions == null ? Map.of() : beverageNutritions);
     }
 }

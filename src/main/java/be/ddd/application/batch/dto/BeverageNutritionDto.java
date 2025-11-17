@@ -51,4 +51,16 @@ public record BeverageNutritionDto(
             return Optional.empty();
         }
     }
+
+    public BeverageNutritionDto withSize(String size) {
+        return new BeverageNutritionDto(
+                size,
+                servingMl,
+                servingKcal,
+                saturatedFatG,
+                proteinG,
+                sodiumMg,
+                sugarG,
+                caffeineMg);
+    }
 }
