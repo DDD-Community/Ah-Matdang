@@ -9,7 +9,6 @@ import be.ddd.domain.repo.CafeBeverageRepository;
 import be.ddd.domain.repo.CafeStoreRepository;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,8 +24,7 @@ public class CafeBeverageBatchService {
     private final CafeBeverageRepository repository;
     private final WebClient.Builder webClientBuilder;
 
-    private final String lambdaUrl =
-            "https://u6wvrcscqwe7rdbblr3xebajf40avfxz.lambda-url.ap-northeast-2.on.aws/";
+    private final String lambdaUrl = "http://127.0.0.1:8000/api/v1/beverages";
     private final CafeStoreRepository cafeStoreRepository;
 
     public List<LambdaBeverageDto> fetchAll() {
@@ -47,7 +45,7 @@ public class CafeBeverageBatchService {
         log.info(
                 "[DEBUG] Processing DTO for beverage: '{}'. Sizes received: {}",
                 dto.name(),
-                dto.beverageNutritions().stream().map(n -> n.size()).collect(Collectors.toList()));
+                dto.beverageNutritions() == null ? List.of() : dto.beverageNutritions().keySet());
         Objects.requireNonNull(dto.name(), "Beverage name required");
         List<CafeBeverage> existingBeverages = repository.findAllByName(dto.name());
         if (!existingBeverages.isEmpty()) {
