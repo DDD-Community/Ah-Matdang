@@ -1,0 +1,12 @@
+services:
+  beverage-ocr-api:
+    image: nijgnoey/beverage-ocr-api:latest
+    container_name: beverage-ocr-api
+    ports:
+      - 8000:8000
+    networks:
+      - ahmatdang-network
+
+networks:
+  ahmatdang-network:
+    external: true
